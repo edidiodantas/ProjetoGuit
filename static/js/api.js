@@ -1,9 +1,9 @@
-/** Backend API client. */
+/** Cliente da API de backend. */
 
 import { API_ENDPOINT } from "./config.js";
 
 /**
- * Send the code, prompt and language to the composer endpoint.
+ * Envia o código, o prompt e a linguagem para o endpoint de composição.
  * @returns {Promise<{explanation: string, code: string, language: string}>}
  */
 export async function composeCode(code, prompt, language) {
@@ -17,7 +17,7 @@ export async function composeCode(code, prompt, language) {
 
   if (!response.ok || !payload.success) {
     throw new Error(
-      payload.detail || payload.message || `Request failed (${response.status})`
+      payload.detail || payload.message || `Requisição falhou (${response.status})`
     );
   }
 

@@ -1,11 +1,11 @@
-# Kimi Vibe
+# IPEIA_VIBE_CODE
 
 Um tutor de código educacional que usa a API Kimi/Moonshot para sugerir melhorias no seu código. A interface mostra o código original ao lado de um diff com as alterações propostas.
 
 ## Funcionalidades
 
 - Backend em FastAPI com duas rotas: `GET /api/health` e `POST /api/composer`.
-- Frontend com Monaco Editor e diff viewer.
+- Frontend com Monaco Editor e visualizador de diff.
 - Tratamento de erros claro quando a chave de API não está configurada.
 - CORS configurável via variável de ambiente.
 - Limite de tamanho do payload e timeout nas chamadas à API Kimi.
@@ -48,12 +48,18 @@ KIMI_API_KEY=sua_chave_aqui
 ## Execução
 
 ```bash
+python3 main.py
+```
+
+Ou, explicitamente com uvicorn:
+
+```bash
 python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info
 ```
 
 Acesse http://localhost:8000 no navegador.
 
-Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Compose** retorna um erro 503 até que a chave seja configurada.
+Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Compor** retorna um erro 503 até que a chave seja configurada.
 
 ## Testes
 

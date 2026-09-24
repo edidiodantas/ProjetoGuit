@@ -1,22 +1,22 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kimi Vibe Composer</title>
+    <title>IPEIA_VIBE_CODE</title>
     <link rel="stylesheet" href="/style.css">
 </head>
 <body>
     <div class="app">
         <header>
-            <h1>Kimi Vibe Composer</h1>
-            <p>Paste your code, ask Kimi/Moonshot to improve it, and review the diff.</p>
+            <h1>IPEIA_VIBE_CODE</h1>
+            <p>Cole seu código, peça ao Kimi/Moonshot para melhorá-lo e revise o diff.</p>
         </header>
 
         <main>
             <section class="controls">
                 <label class="language-label">
-                    Language
+                    Linguagem
                     <select id="language">
                         <option value="python">Python</option>
                         <option value="javascript">JavaScript</option>
@@ -35,13 +35,13 @@
                     <textarea
                         id="prompt"
                         rows="3"
-                        placeholder="e.g., Add error handling and type hints"
+                        placeholder="ex.: Adicione tratamento de erros e anotações de tipo"
                     ></textarea>
                 </label>
 
                 <div class="buttons">
-                    <button id="composeBtn" type="button">Compose</button>
-                    <button id="resetBtn" type="button" class="secondary">Reset</button>
+                    <button id="composeBtn" type="button">Compor</button>
+                    <button id="resetBtn" type="button" class="secondary">Redefinir</button>
                 </div>
 
                 <div id="status" class="status" aria-live="polite"></div>
@@ -53,7 +53,7 @@
             </section>
 
             <section class="editor-section diff-section">
-                <h2>Diff</h2>
+                <h2>Diferença</h2>
                 <div id="diffEditor" class="editor"></div>
             </section>
         </main>

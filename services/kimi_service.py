@@ -1,4 +1,4 @@
-"""Thin client for the Moonshot / Kimi OpenAI-compatible API."""
+"""Cliente leve para a API compatível com OpenAI da Moonshot / Kimi."""
 
 from __future__ import annotations
 
@@ -10,11 +10,11 @@ from openai import AsyncOpenAI, OpenAIError
 
 
 class KimiServiceError(Exception):
-    """Raised when the Kimi/Moonshot service cannot complete a request."""
+    """Levantada quando o serviço Kimi/Moonshot não consegue completar uma requisição."""
 
 
 class KimiService:
-    """Call the Kimi/Moonshot chat API and parse the markdown response."""
+    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown."""
 
     def __init__(
         self,
@@ -32,8 +32,8 @@ class KimiService:
         self.request_timeout = request_timeout
         self.max_code_chars = max_code_chars
 
-        # Allow the server to boot and serve the UI without a key, but fail
-        # clearly when the composer endpoint is used.
+        # Permite que o servidor inicie e sirva a interface sem uma chave, mas falhe
+        # de forma clara quando o endpoint de composição for usado.
         self._client: Optional[AsyncOpenAI] = None
         if self.api_key:
             self._client = AsyncOpenAI(
@@ -52,39 +52,40 @@ class KimiService:
         instruction: str,
         language: str = "python",
     ) -> dict[str, str]:
-        """Ask Kimi to rewrite *code* according to *instruction*.
+        """Solicita ao Kimi que reescreva *code* de acordo com *instruction*.
 
-        Returns a dict with:
-            - explanation: free-form text before the code block.
-            - code: the extracted updated code, or the original code if none was found.
-            - language: the language identifier passed in.
+        Retorna um dicionário com:
+            - explanation: texto livre antes do bloco de código.
+            - code: o código atualizado extraído, ou o código original se nenhum for encontrado.
+            - language: o identificador da linguagem passado.
         """
         if not self._client:
-            raise KimiServiceError("KIMI_API_KEY is not configured")
+            raise KimiServiceError("A KIMI_API_KEY não está configurada")
 
         instruction = (instruction or "").strip()
         if not instruction:
-            raise KimiServiceError("Instruction prompt cannot be empty")
+            raise KimiServiceError("O prompt de instrução não pode estar vazio")
 
         code = code or ""
         if len(code) > self.max_code_chars:
             raise KimiServiceError(
-                f"Code payload exceeds the limit of {self.max_code_chars} characters"
+                f"O código enviado excede o limite de {self.max_code_chars} caracteres"
             )
 
         system_prompt = (
-            "You are a helpful coding tutor powered by Kimi/Moonshot. "
-            "The user provides source code and an instruction. "
-            "Briefly explain the changes you plan to make, then provide the "
-            "complete updated code in a single fenced markdown code block. "
-            "If no changes are needed, say so and return the original code unchanged."
+            "Você é um tutor de programação útil, baseado na Kimi/Moonshot. "
+            "O usuário fornece um código-fonte e uma instrução. "
+            "Explique brevemente as alterações que você planeja fazer e, em seguida, forneça "
+            "o código atualizado completo em um único bloco de código markdown cercado por ```. "
+            "Se não houver alterações necessárias, diga isso e devolva o código original inalterado. "
+            "Responda sempre em português do Brasil."
         )
 
         user_prompt = (
-            f"Language: {language}\n\n"
-            f"Original code:\n```{language}\n{code}\n```\n\n"
-            f"Instruction: {instruction}\n\n"
-            "Please respond with a short explanation followed by the updated code block."
+            f"Linguagem: {language}\n\n"
+            f"Código original:\n```{language}\n{code}\n```\n\n"
+            f"Instrução: {instruction}\n\n"
+            "Por favor, responda com uma breve explicação seguida do bloco de código atualizado."
         )
 
         try:
@@ -97,7 +98,7 @@ class KimiService:
                 temperature=0.2,
             )
         except OpenAIError as exc:
-            raise KimiServiceError(f"Kimi API error: {exc}") from exc
+            raise KimiServiceError(f"Erro na API Kimi: {exc}") from exc
 
         content = response.choices[0].message.content or ""
         return self._parse_response(content, fallback_code=code, language=language)
@@ -108,15 +109,15 @@ class KimiService:
         fallback_code: str,
         language: str,
     ) -> dict[str, str]:
-        """Extract explanation and the last fenced code block from the model output.
+        """Extrai a explicação e o último bloco de código cercado da resposta do modelo.
 
-        Using the last block is defensive: if the model echoes the original code
-        first and then the updated code, we prefer the update.
+        Usar o último bloco é defensivo: se o modelo repetir o código original primeiro
+        e depois o código atualizado, preferimos a atualização.
         """
         content = content.strip()
         if not content:
             return {
-                "explanation": "The model returned an empty response.",
+                "explanation": "O modelo retornou uma resposta vazia.",
                 "code": fallback_code,
                 "language": language,
             }

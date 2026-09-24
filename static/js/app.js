@@ -1,4 +1,4 @@
-/** Main application wiring for the Kimi Vibe composer UI. */
+/** Ligação principal da aplicação para a interface do IPEIA_VIBE_CODE. */
 
 import { DEFAULT_LANGUAGE, DEFAULT_CODE } from "./config.js";
 import { initEditors, setModelLanguage, disposeModel, createModel } from "./editor.js";
@@ -25,7 +25,7 @@ async function main() {
 
   async function onCompose() {
     if (!originalModel || !diffEditor) {
-      setStatus("Editor is still loading.", "error");
+      setStatus("O editor ainda está carregando.", "error");
       return;
     }
 
@@ -34,17 +34,17 @@ async function main() {
     const language = languageSelect.value;
 
     if (!prompt) {
-      setStatus("Enter a prompt first.", "error");
+      setStatus("Digite um prompt primeiro.", "error");
       promptInput.focus();
       return;
     }
 
-    setStatus("Asking Kimi/Moonshot...");
+    setStatus("Consultando Kimi/Moonshot...");
     composeBtn.disabled = true;
 
     try {
       const data = await composeCode(code, prompt, language);
-      const explanation = data.explanation || "Done.";
+      const explanation = data.explanation || "Pronto.";
       const updatedCode = data.code || code;
 
       setStatus(explanation.split("\n")[0], "success");
@@ -53,8 +53,8 @@ async function main() {
       modifiedModel = createModel(window.monaco, updatedCode, language);
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
     } catch (error) {
-      setStatus(`Error: ${error.message}`, "error");
-      console.error("Compose failed:", error);
+      setStatus(`Erro: ${error.message}`, "error");
+      console.error("Falha na composição:", error);
     } finally {
       composeBtn.disabled = false;
     }
@@ -93,5 +93,5 @@ async function main() {
 }
 
 main().catch((error) => {
-  console.error("Failed to start Kimi Vibe UI:", error);
+  console.error("Falha ao iniciar a interface IPEIA_VIBE_CODE:", error);
 });

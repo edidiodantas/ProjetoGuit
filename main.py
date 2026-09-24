@@ -1,4 +1,4 @@
-"""FastAPI application for the Kimi Vibe coding tutor."""
+"""Aplicação FastAPI para o tutor de código IPEIA_VIBE_CODE."""
 
 from __future__ import annotations
 
@@ -27,14 +27,14 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     if not app.state.kimi.configured:
         logger.warning(
-            "KIMI_API_KEY is not set. The UI will work, but /api/composer "
-            "will return 503 until an API key is provided."
+            "A KIMI_API_KEY não está configurada. A interface vai funcionar, mas /api/composer "
+            "retornará 503 até que uma chave de API seja fornecida."
         )
     yield
-    logger.info("Shutting down Kimi Vibe server.")
+    logger.info("Desligando o servidor IPEIA_VIBE_CODE.")
 
 
-app = FastAPI(title="Kimi Vibe", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="IPEIA_VIBE_CODE", version="0.2.0", lifespan=lifespan)
 app.state.kimi = KimiService(
     request_timeout=settings.kimi_request_timeout,
     max_code_chars=settings.max_code_chars,
@@ -50,9 +50,9 @@ app.add_middleware(
 
 
 class ComposeRequest(BaseModel):
-    code: str = Field(..., description="The source code to improve.")
-    prompt: str = Field(..., description="What the model should do with the code.")
-    language: str = Field(default="python", description="Programming language.")
+    code: str = Field(..., description="O código-fonte a ser melhorado.")
+    prompt: str = Field(..., description="O que o modelo deve fazer com o código.")
+    language: str = Field(default="python", description="Linguagem de programação.")
 
 
 class ComposeResponse(BaseModel):
@@ -62,7 +62,7 @@ class ComposeResponse(BaseModel):
 
 @app.exception_handler(KimiServiceError)
 async def kimi_service_error_handler(request: Request, exc: KimiServiceError):
-    logger.warning("KimiServiceError on %s: %s", request.url.path, exc)
+    logger.warning("KimiServiceError em %s: %s", request.url.path, exc)
     return JSONResponse(status_code=503, content={"detail": str(exc)})
 
 
@@ -83,8 +83,8 @@ async def composer(req: ComposeRequest) -> ComposeResponse:
         # Handled by the dedicated exception handler above.
         raise
     except Exception as exc:
-        logger.exception("Unexpected error in /api/composer")
-        raise HTTPException(status_code=500, detail="Internal server error") from exc
+        logger.exception("Erro inesperado em /api/composer")
+        raise HTTPException(status_code=500, detail="Erro interno do servidor") from exc
 
 
 # Mount static files LAST so API routes take precedence. Using html=True serves
@@ -95,5 +95,9 @@ app.mount("/", StaticFiles(directory="static", html=True), name="static")
 if __name__ == "__main__":
     import uvicorn
 
-    logger.info("Starting Kimi Vibe server on %s:%s", settings.app_host, settings.app_port)
+    logger.info(
+        "Iniciando servidor IPEIA_VIBE_CODE em %s:%s",
+        settings.app_host,
+        settings.app_port,
+    )
     uvicorn.run("main:app", host=settings.app_host, port=settings.app_port, reload=True)

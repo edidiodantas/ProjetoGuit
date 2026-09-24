@@ -1,4 +1,4 @@
-"""Application configuration package."""
+"""Pacote de configuração da aplicação."""
 
 from config.settings import Settings, get_settings
 

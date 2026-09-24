@@ -34,7 +34,7 @@ class TestParseResponse:
         result = KimiService._parse_response(
             "", fallback_code="unchanged", language="python"
         )
-        assert "empty" in result["explanation"]
+        assert "vazia" in result["explanation"]
         assert result["code"] == "unchanged"
 
     def test_optional_language_tag(self):
@@ -56,14 +56,14 @@ class TestComposeGuards:
 
     def test_compose_with_empty_prompt_raises(self):
         service = KimiService(api_key="fake-key")
-        with pytest.raises(KimiServiceError, match="prompt cannot be empty"):
+        with pytest.raises(KimiServiceError, match="não pode estar vazio"):
             import asyncio
 
             asyncio.run(service.compose("code", "   "))
 
     def test_compose_with_oversized_payload_raises(self):
         service = KimiService(api_key="fake-key", max_code_chars=5)
-        with pytest.raises(KimiServiceError, match="payload exceeds"):
+        with pytest.raises(KimiServiceError, match="excede o limite"):
             import asyncio
 
             asyncio.run(service.compose("print('too long')", "prompt"))

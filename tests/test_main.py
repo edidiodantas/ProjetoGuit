@@ -22,7 +22,7 @@ def test_static_index_served_at_root(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "Kimi Vibe Composer" in response.text
+    assert "IPEIA_VIBE_CODE" in response.text
 
 
 def test_static_js_module_served(client):
