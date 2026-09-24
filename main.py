@@ -12,7 +12,15 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from config import get_settings
-from services.kimi_service import KimiService, KimiServiceError
+from services.kimi_service import (
+    KimiAuthError,
+    KimiConnectionError,
+    KimiInvalidRequestError,
+    KimiRateLimitError,
+    KimiService,
+    KimiServiceError,
+    KimiServiceUnavailableError,
+)
 
 settings = get_settings()
 
@@ -62,8 +70,23 @@ class ComposeResponse(BaseModel):
 
 @app.exception_handler(KimiServiceError)
 async def kimi_service_error_handler(request: Request, exc: KimiServiceError):
+    """Converte exceções do serviço em respostas JSON com tipo e mensagem em português."""
     logger.warning("KimiServiceError em %s: %s", request.url.path, exc)
-    return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+    status_map = {
+        KimiAuthError.error_type: 401,
+        KimiRateLimitError.error_type: 429,
+        KimiServiceUnavailableError.error_type: 503,
+        KimiConnectionError.error_type: 503,
+        KimiInvalidRequestError.error_type: 400,
+        KimiServiceError.error_type: 502,
+    }
+    status_code = status_map.get(exc.error_type, 502)
+
+    return JSONResponse(
+        status_code=status_code,
+        content={"error_type": exc.error_type, "message": exc.message},
+    )
 
 
 @app.get("/api/health")

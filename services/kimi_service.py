@@ -6,15 +6,74 @@ import os
 import re
 from typing import Optional
 
-from openai import AsyncOpenAI, OpenAIError
+from openai import (
+    AsyncOpenAI,
+    AuthenticationError,
+    BadRequestError,
+    APIConnectionError,
+    APIStatusError,
+    OpenAIError,
+    RateLimitError,
+)
 
 
 class KimiServiceError(Exception):
-    """Levantada quando o serviço Kimi/Moonshot não consegue completar uma requisição."""
+    """Base para erros traduzidos do serviço Kimi/Moonshot.
+
+    Cada subclasse carrega um ``error_type`` estável (usado pelo frontend para
+    identificar a mensagem amigável) e uma ``message`` em português.
+    """
+
+    error_type: str = "generic_api_error"
+    default_message: str = "erro genérico da API"
+
+    def __init__(self, message: str | None = None) -> None:
+        self.message = message or self.default_message
+        super().__init__(self.message)
+
+
+class KimiAuthError(KimiServiceError):
+    """Chave de API inválida ou não configurada."""
+
+    error_type = "auth_error"
+    default_message = "chave inválida ou não configurada"
+
+
+class KimiRateLimitError(KimiServiceError):
+    """Quota ou limite de requisições atingido."""
+
+    error_type = "rate_limit"
+    default_message = "limite de requisições atingido; aguarde ou verifique créditos"
+
+
+class KimiServiceUnavailableError(KimiServiceError):
+    """Erro temporário no serviço da Moonshot (HTTP 5xx)."""
+
+    error_type = "service_unavailable"
+    default_message = "erro temporário no serviço da Moonshot"
+
+
+class KimiConnectionError(KimiServiceError):
+    """Sem conexão com a internet ou serviço indisponível."""
+
+    error_type = "connection_error"
+    default_message = "sem conexão com a internet ou serviço indisponível"
+
+
+class KimiInvalidRequestError(KimiServiceError):
+    """Requisição inválida (prompt vazio, modelo inexistente, payload muito grande)."""
+
+    error_type = "invalid_request"
+    default_message = "requisição inválida"
 
 
 class KimiService:
-    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown."""
+    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown.
+
+    O modelo padrão é ``kimi-k2.5-lite``, indicado para o plano gratuito da
+    Moonshot e suficiente para pequenos projetos. Pode ser sobrescrito pelo
+    argumento ``model`` ou pela variável de ambiente ``KIMI_MODEL``.
+    """
 
     def __init__(
         self,
@@ -28,7 +87,7 @@ class KimiService:
         self.base_url = base_url or os.getenv(
             "KIMI_BASE_URL", "https://api.moonshot.cn/v1"
         )
-        self.model = model or os.getenv("KIMI_MODEL", "kimi-latest")
+        self.model = model or os.getenv("KIMI_MODEL", "kimi-k2.5-lite")
         self.request_timeout = request_timeout
         self.max_code_chars = max_code_chars
 
@@ -60,15 +119,15 @@ class KimiService:
             - language: o identificador da linguagem passado.
         """
         if not self._client:
-            raise KimiServiceError("A KIMI_API_KEY não está configurada")
+            raise KimiAuthError("A chave de API (KIMI_API_KEY) não está configurada")
 
         instruction = (instruction or "").strip()
         if not instruction:
-            raise KimiServiceError("O prompt de instrução não pode estar vazio")
+            raise KimiInvalidRequestError("O prompt de instrução não pode estar vazio")
 
         code = code or ""
         if len(code) > self.max_code_chars:
-            raise KimiServiceError(
+            raise KimiInvalidRequestError(
                 f"O código enviado excede o limite de {self.max_code_chars} caracteres"
             )
 
@@ -97,8 +156,23 @@ class KimiService:
                 ],
                 temperature=0.2,
             )
+        except AuthenticationError as exc:
+            raise KimiAuthError() from exc
+        except RateLimitError as exc:
+            raise KimiRateLimitError() from exc
+        except BadRequestError as exc:
+            detail = getattr(exc, "message", None) or str(exc)
+            raise KimiInvalidRequestError(f"requisição inválida: {detail}") from exc
+        except APIConnectionError as exc:
+            raise KimiConnectionError() from exc
+        except APIStatusError as exc:
+            if getattr(exc, "status_code", 0) >= 500:
+                raise KimiServiceUnavailableError() from exc
+            raise KimiServiceError(
+                f"erro {getattr(exc, 'status_code', 'desconhecido')} na API Kimi"
+            ) from exc
         except OpenAIError as exc:
-            raise KimiServiceError(f"Erro na API Kimi: {exc}") from exc
+            raise KimiServiceError(f"erro genérico da API: {exc}") from exc
 
         content = response.choices[0].message.content or ""
         return self._parse_response(content, fallback_code=code, language=language)

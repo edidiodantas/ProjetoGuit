@@ -2,14 +2,45 @@
 
 import { DEFAULT_LANGUAGE, DEFAULT_CODE } from "./config.js";
 import { initEditors, setModelLanguage, disposeModel, createModel } from "./editor.js";
-import { composeCode } from "./api.js";
+import { ApiError, composeCode } from "./api.js";
 
-const STATUS_ICONS = {
-  info: "ℹ",
-  success: "✓",
-  warning: "⚠",
-  error: "✕",
-};
+/**
+ * Converte um erro da API em uma mensagem amigável em português.
+ * @param {ApiError} error
+ * @returns {string}
+ */
+function friendlyErrorMessage(error) {
+  if (!(error instanceof ApiError)) {
+    return `Erro inesperado: ${error.message}`;
+  }
+
+  switch (error.errorType) {
+    case "auth_error":
+      return (
+        "Chave de API inválida ou não configurada. " +
+        "Verifique se a variável KIMI_API_KEY está preenchida corretamente no arquivo .env."
+      );
+    case "rate_limit":
+      return (
+        "Cota gratuita esgotada ou limite de requisições atingido. " +
+        "Aguarde alguns minutos ou verifique sua chave e créditos na plataforma Moonshot."
+      );
+    case "service_unavailable":
+      return (
+        "O serviço da Moonshot está temporariamente indisponível. " +
+        "Aguarde alguns instantes e tente novamente."
+      );
+    case "connection_error":
+      return (
+        "Sem conexão com a internet ou serviço indisponível. " +
+        "Verifique sua conexão de rede e tente novamente."
+      );
+    case "invalid_request":
+      return `Requisição inválida: ${error.message}`;
+    default:
+      return `Erro na API (${error.status}): ${error.message}`;
+  }
+}
 
 async function main() {
   const originalContainer = document.getElementById("originalEditor");
@@ -99,7 +130,7 @@ async function main() {
       showDiffEmptyState(false);
       statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (error) {
-      setStatus(`Erro: ${error.message}`, "error");
+      setStatus(friendlyErrorMessage(error), "error");
       console.error("Falha na composição:", error);
     } finally {
       setLoading(false);

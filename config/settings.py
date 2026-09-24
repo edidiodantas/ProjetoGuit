@@ -26,11 +26,17 @@ class Settings:
     """
 
     # Kimi / Moonshot API
+    # Uma chave free-tier de https://platform.moonshot.cn/ é suficiente para
+    # estudantes e projetos pequenos. O modelo padrão "kimi-k2.5-lite" é o
+    # indicado para economizar no plano gratuito; use outro modelo via .env se
+    # tiver créditos pagos.
     kimi_api_key: str | None = field(default_factory=lambda: os.getenv("KIMI_API_KEY"))
     kimi_base_url: str = field(
         default_factory=lambda: os.getenv("KIMI_BASE_URL", "https://api.moonshot.cn/v1")
     )
-    kimi_model: str = field(default_factory=lambda: os.getenv("KIMI_MODEL", "kimi-latest"))
+    # Modelo padrão do Kimi/Moonshot. "kimi-k2.5-lite" é a opção indicada para o
+    # tier gratuito e pequenas tarefas de código. Pode ser substituído via .env.
+    kimi_model: str = field(default_factory=lambda: os.getenv("KIMI_MODEL", "kimi-k2.5-lite"))
 
     # Server
     app_host: str = field(default_factory=lambda: os.getenv("APP_HOST", "0.0.0.0"))
