@@ -81,7 +81,7 @@ Os testes cobrem:
 |----------|-----------|--------|
 | `KIMI_API_KEY` | Chave da API Moonshot/Kimi | — |
 | `KIMI_BASE_URL` | URL base compatível com OpenAI | `https://api.moonshot.cn/v1` |
-| `KIMI_MODEL` | Modelo usado | `kimi-latest` |
+| `KIMI_MODEL` | Modelo usado (use `kimi-k2.5-lite` no free tier) | `kimi-k2.5-lite` |
 | `APP_HOST` | Host do servidor | `0.0.0.0` |
 | `APP_PORT` | Porta do servidor | `8000` |
 | `CORS_ORIGINS` | Origens permitidas, separadas por vírgula | `*` |
