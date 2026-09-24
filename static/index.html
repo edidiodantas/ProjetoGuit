@@ -8,53 +8,80 @@
 </head>
 <body>
     <div class="app">
-        <header>
+        <header class="app-header">
             <h1>IPEIA_VIBE_CODE</h1>
-            <p>Cole seu código, peça ao Kimi/Moonshot para melhorá-lo e revise o diff.</p>
+            <p>Cole seu código, peça ao Kimi/Moonshot para melhorá-lo e revise o diff lado a lado.</p>
         </header>
 
         <main>
-            <section class="controls">
-                <label class="language-label">
-                    Linguagem
-                    <select id="language">
-                        <option value="python">Python</option>
-                        <option value="javascript">JavaScript</option>
-                        <option value="typescript">TypeScript</option>
-                        <option value="html">HTML</option>
-                        <option value="css">CSS</option>
-                        <option value="json">JSON</option>
-                        <option value="java">Java</option>
-                        <option value="cpp">C++</option>
-                        <option value="go">Go</option>
-                    </select>
-                </label>
+            <section class="controls" aria-label="Configuração da composição">
+                <form id="composeForm" class="controls-form" novalidate>
+                    <div class="control-group language-group">
+                        <label for="language">Linguagem</label>
+                        <select id="language" name="language">
+                            <option value="python">Python</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="typescript">TypeScript</option>
+                            <option value="html">HTML</option>
+                            <option value="css">CSS</option>
+                            <option value="json">JSON</option>
+                            <option value="java">Java</option>
+                            <option value="cpp">C++</option>
+                            <option value="go">Go</option>
+                        </select>
+                    </div>
 
-                <label class="prompt-label">
-                    Prompt
-                    <textarea
-                        id="prompt"
-                        rows="3"
-                        placeholder="ex.: Adicione tratamento de erros e anotações de tipo"
-                    ></textarea>
-                </label>
+                    <div class="control-group prompt-group">
+                        <label for="prompt">Prompt</label>
+                        <textarea
+                            id="prompt"
+                            name="prompt"
+                            rows="3"
+                            placeholder="ex.: Adicione tratamento de erros e anotações de tipo"
+                        ></textarea>
+                    </div>
 
-                <div class="buttons">
-                    <button id="composeBtn" type="button">Compor</button>
-                    <button id="resetBtn" type="button" class="secondary">Redefinir</button>
-                </div>
+                    <div class="control-group buttons">
+                        <button id="composeBtn" type="submit" class="primary">
+                            <span class="btn-text">Compor</span>
+                            <span class="btn-spinner" aria-hidden="true"></span>
+                        </button>
+                        <button id="resetBtn" type="button" class="secondary">Redefinir</button>
+                    </div>
+                </form>
 
-                <div id="status" class="status" aria-live="polite"></div>
+                <div
+                    id="status"
+                    class="status"
+                    role="status"
+                    aria-live="polite"
+                    aria-atomic="true"
+                ></div>
             </section>
 
-            <section class="editor-section">
-                <h2>Original</h2>
+            <section class="editor-section" aria-label="Editor original">
+                <div class="section-header">
+                    <h2>Original</h2>
+                    <span class="section-hint">Edite o código que será enviado à IA</span>
+                </div>
                 <div id="originalEditor" class="editor"></div>
             </section>
 
-            <section class="editor-section diff-section">
-                <h2>Diferença</h2>
-                <div id="diffEditor" class="editor"></div>
+            <section class="editor-section diff-section" aria-label="Diferença proposta">
+                <div class="section-header">
+                    <h2>Diferença</h2>
+                    <span class="section-hint">Alterações sugeridas pelo modelo</span>
+                </div>
+                <div class="editor-wrapper">
+                    <div id="diffEditor" class="editor"></div>
+                    <div id="diffEmptyState" class="empty-state">
+                        <div class="empty-state-icon" aria-hidden="true">✨</div>
+                        <p class="empty-state-title">Nenhuma sugestão ainda</p>
+                        <p class="empty-state-description">
+                            Preencha o prompt e clique em <strong>Compor</strong> para ver o diff com as melhorias propostas.
+                        </p>
+                    </div>
+                </div>
             </section>
         </main>
     </div>

@@ -4,18 +4,49 @@ import { DEFAULT_LANGUAGE, DEFAULT_CODE } from "./config.js";
 import { initEditors, setModelLanguage, disposeModel, createModel } from "./editor.js";
 import { composeCode } from "./api.js";
 
+const STATUS_ICONS = {
+  info: "ℹ",
+  success: "✓",
+  warning: "⚠",
+  error: "✕",
+};
+
 async function main() {
   const originalContainer = document.getElementById("originalEditor");
   const diffContainer = document.getElementById("diffEditor");
+  const composeForm = document.getElementById("composeForm");
   const promptInput = document.getElementById("prompt");
   const languageSelect = document.getElementById("language");
   const composeBtn = document.getElementById("composeBtn");
   const resetBtn = document.getElementById("resetBtn");
   const statusEl = document.getElementById("status");
+  const diffEmptyState = document.getElementById("diffEmptyState");
+
+  let hasComposed = false;
 
   function setStatus(message, type = "") {
     statusEl.textContent = message;
-    statusEl.className = "status " + type;
+    statusEl.className = "status" + (type ? ` ${type}` : "");
+    if (type) {
+      statusEl.setAttribute("role", type === "error" ? "alert" : "status");
+    } else {
+      statusEl.setAttribute("role", "status");
+    }
+  }
+
+  function setLoading(isLoading) {
+    composeBtn.disabled = isLoading;
+    resetBtn.disabled = isLoading;
+    composeForm.setAttribute("aria-busy", isLoading ? "true" : "false");
+    composeBtn.classList.toggle("loading", isLoading);
+  }
+
+  function showDiffEmptyState(show) {
+    if (show) {
+      diffEmptyState.classList.remove("hidden");
+    } else {
+      diffEmptyState.classList.add("hidden");
+    }
   }
 
   let { originalModel, modifiedModel, diffEditor } = await initEditors(
@@ -23,9 +54,13 @@ async function main() {
     diffContainer
   );
 
-  async function onCompose() {
+  async function onCompose(event) {
+    if (event) {
+      event.preventDefault();
+    }
+
     if (!originalModel || !diffEditor) {
-      setStatus("O editor ainda está carregando.", "error");
+      setStatus("O editor ainda está carregando. Aguarde um instante.", "error");
       return;
     }
 
@@ -34,29 +69,40 @@ async function main() {
     const language = languageSelect.value;
 
     if (!prompt) {
-      setStatus("Digite um prompt primeiro.", "error");
+      setStatus("Digite um prompt descrevendo a melhoria desejada.", "warning");
       promptInput.focus();
       return;
     }
 
-    setStatus("Consultando Kimi/Moonshot...");
-    composeBtn.disabled = true;
+    if (!code.trim()) {
+      setStatus("O editor original está vazio. Cole ou digite algum código primeiro.", "warning");
+      originalContainer.focus();
+      return;
+    }
+
+    setStatus("Consultando Kimi/Moonshot... isso pode levar alguns segundos.", "info");
+    setLoading(true);
 
     try {
       const data = await composeCode(code, prompt, language);
-      const explanation = data.explanation || "Pronto.";
+      const explanation = data.explanation || "Composição concluída.";
       const updatedCode = data.code || code;
 
-      setStatus(explanation.split("\n")[0], "success");
+      const firstLine = explanation.split("\n")[0];
+      setStatus(firstLine, "success");
 
       disposeModel(modifiedModel);
       modifiedModel = createModel(window.monaco, updatedCode, language);
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
+
+      hasComposed = true;
+      showDiffEmptyState(false);
+      statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (error) {
       setStatus(`Erro: ${error.message}`, "error");
       console.error("Falha na composição:", error);
     } finally {
-      composeBtn.disabled = false;
+      setLoading(false);
     }
   }
 
@@ -72,7 +118,10 @@ async function main() {
       modifiedModel = createModel(window.monaco, DEFAULT_CODE, DEFAULT_LANGUAGE);
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
     }
+    hasComposed = false;
+    showDiffEmptyState(true);
     setStatus("");
+    promptInput.focus();
   }
 
   languageSelect.addEventListener("change", () => {
@@ -81,7 +130,7 @@ async function main() {
     setModelLanguage(window.monaco, modifiedModel, language);
   });
 
-  composeBtn.addEventListener("click", onCompose);
+  composeForm.addEventListener("submit", onCompose);
   resetBtn.addEventListener("click", onReset);
 
   promptInput.addEventListener("keydown", (event) => {
@@ -90,6 +139,10 @@ async function main() {
       onCompose();
     }
   });
+
+  // Ajusta o estado inicial.
+  showDiffEmptyState(true);
+  setStatus("Pronto. Cole seu código, escreva o prompt e clique em Compor.", "info");
 }
 
 main().catch((error) => {
