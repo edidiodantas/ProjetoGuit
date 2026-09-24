@@ -68,7 +68,12 @@ class KimiInvalidRequestError(KimiServiceError):
 
 
 class KimiService:
-    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown."""
+    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown.
+
+    O modelo padrão é ``kimi-k2.5-lite``, indicado para o plano gratuito da
+    Moonshot e suficiente para pequenos projetos. Pode ser sobrescrito pelo
+    argumento ``model`` ou pela variável de ambiente ``KIMI_MODEL``.
+    """
 
     def __init__(
         self,
