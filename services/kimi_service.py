@@ -14,7 +14,13 @@ class KimiServiceError(Exception):
 
 
 class KimiService:
-    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown."""
+    """Chama a API de chat Kimi/Moonshot e interpreta a resposta em markdown.
+
+    O modelo é configurável via argumento `model`, variável de ambiente
+    `KIMI_MODEL` ou o padrão "kimi-latest". Para o plano gratuito da
+    Moonshot, escolha um modelo menor (ex.: kimi-k2.5-lite) e salve-o no
+    arquivo `.env` para economizar tokens.
+    """
 
     def __init__(
         self,
@@ -28,6 +34,7 @@ class KimiService:
         self.base_url = base_url or os.getenv(
             "KIMI_BASE_URL", "https://api.moonshot.cn/v1"
         )
+        # Modelo escolhido: prioridade é argumento > env > padrão.
         self.model = model or os.getenv("KIMI_MODEL", "kimi-latest")
         self.request_timeout = request_timeout
         self.max_code_chars = max_code_chars

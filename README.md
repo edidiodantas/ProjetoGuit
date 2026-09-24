@@ -17,6 +17,23 @@ Um tutor de código educacional que usa a API Kimi/Moonshot para sugerir melhori
 - Python 3.12+
 - Uma chave de API da Moonshot/Kimi (opcional para testar a interface localmente)
 
+## Criando uma chave gratuita (free tier)
+
+1. Acesse https://platform.moonshot.cn/ e crie uma conta.
+2. No painel, vá em **API Keys** (ou "密钥管理") e gere uma nova chave.
+3. Copie a chave e cole no arquivo `.env` como `KIMI_API_KEY`.
+
+O plano gratuito tem uso limitado, mas costuma ser suficiente para estudantes e projetos pequenos.
+
+> **Dica:** para economizar tokens no free tier, defina um modelo menor no `.env`:
+>
+> ```env
+> KIMI_MODEL=kimi-k2.5-lite
+> ```
+>
+> Se preferir usar sempre o modelo mais recente disponível para a sua chave,
+> mantenha `KIMI_MODEL=kimi-latest` (padrão).
+
 ## Configuração
 
 1. Clone ou copie o projeto para a pasta desejada.
@@ -43,6 +60,8 @@ Edite `.env`:
 
 ```env
 KIMI_API_KEY=sua_chave_aqui
+# Opcional: escolha um modelo para o plano gratuito
+KIMI_MODEL=kimi-latest
 ```
 
 ## Execução
@@ -60,6 +79,8 @@ python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info
 Acesse http://localhost:8000 no navegador.
 
 Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Compor** retorna um erro 503 até que a chave seja configurada.
+
+Veja o guia passo a passo em [`docs/manual.md`](docs/manual.md).
 
 ## Testes
 
@@ -81,7 +102,7 @@ Os testes cobrem:
 |----------|-----------|--------|
 | `KIMI_API_KEY` | Chave da API Moonshot/Kimi | — |
 | `KIMI_BASE_URL` | URL base compatível com OpenAI | `https://api.moonshot.cn/v1` |
-| `KIMI_MODEL` | Modelo usado | `kimi-latest` |
+| `KIMI_MODEL` | Modelo usado. Use `kimi-k2.5-lite` para economizar no plano gratuito. | `kimi-latest` |
 | `APP_HOST` | Host do servidor | `0.0.0.0` |
 | `APP_PORT` | Porta do servidor | `8000` |
 | `CORS_ORIGINS` | Origens permitidas, separadas por vírgula | `*` |

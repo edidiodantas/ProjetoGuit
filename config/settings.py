@@ -26,6 +26,10 @@ class Settings:
     """
 
     # Kimi / Moonshot API
+    # A free-tier API key from https://platform.moonshot.cn/ works fine for
+    # students and small projects. Set KIMI_MODEL to a smaller model (e.g.
+    # kimi-k2.5-lite) in .env if you want to save free-tier quota; the default
+    # kimi-latest alias resolves to the best model available to your key.
     kimi_api_key: str | None = field(default_factory=lambda: os.getenv("KIMI_API_KEY"))
     kimi_base_url: str = field(
         default_factory=lambda: os.getenv("KIMI_BASE_URL", "https://api.moonshot.cn/v1")
