@@ -1,0 +1,92 @@
+"""FastAPI application for the Kimi Vibe coding tutor."""
+
+from __future__ import annotations
+
+import logging
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+
+from config import get_settings
+from services.kimi_service import KimiService, KimiServiceError
+
+settings = get_settings()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not app.state.kimi.configured:
+        logger.warning(
+            "KIMI_API_KEY is not set. The UI will work, but /api/composer "
+            "will return 503 until an API key is provided."
+        )
+    yield
+    logger.info("Shutting down Kimi Vibe server.")
+
+
+app = FastAPI(title="Kimi Vibe", version="0.2.0", lifespan=lifespan)
+app.state.kimi = KimiService(
+    request_timeout=settings.kimi_request_timeout,
+    max_code_chars=settings.max_code_chars,
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.cors_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+class ComposeRequest(BaseModel):
+    code: str = Field(..., description="The source code to improve.")
+    prompt: str = Field(..., description="What the model should do with the code.")
+    language: str = Field(default="python", description="Programming language.")
+
+
+class ComposeResponse(BaseModel):
+    success: bool
+    data: dict
+
+
+@app.exception_handler(KimiServiceError)
+async def kimi_service_error_handler(request: Request, exc: KimiServiceError):
+    logger.warning("KimiServiceError on %s: %s", request.url.path, exc)
+    return JSONResponse(status_code=503, content={"detail": str(exc)})
+
+
+@app.get("/api/health")
+async def health() -> dict[str, object]:
+    return {
+        "status": "ok",
+        "kimi_configured": app.state.kimi.configured,
+    }
+
+
+@app.post("/api/composer", response_model=ComposeResponse)
+async def composer(req: ComposeRequest) -> ComposeResponse:
+    try:
+        result = await app.state.kimi.compose(req.code, req.prompt, req.language)
+        return ComposeResponse(success=True, data=result)
+    except KimiServiceError:
+        # Handled by the dedicated exception handler above.
+        raise
+    except Exception as exc:
+        logger.exception("Unexpected error in /api/composer")
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
+# Mount static files LAST so API routes take precedence. Using html=True serves
+# index.html for the root path and any unmatched path that does not match a file.
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
