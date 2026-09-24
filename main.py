@@ -90,3 +90,10 @@ async def composer(req: ComposeRequest) -> ComposeResponse:
 # Mount static files LAST so API routes take precedence. Using html=True serves
 # index.html for the root path and any unmatched path that does not match a file.
 app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    logger.info("Starting Kimi Vibe server on %s:%s", settings.app_host, settings.app_port)
+    uvicorn.run("main:app", host=settings.app_host, port=settings.app_port, reload=True)
