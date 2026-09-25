@@ -122,9 +122,10 @@ main {
     padding: 1.5rem 2rem 2rem;
     display: grid;
     grid-template-columns: 360px 1fr 1fr;
-    grid-template-rows: 1fr;
+    grid-template-rows: minmax(0, 1fr);
     gap: 1.5rem;
     align-items: stretch;
+    min-height: 0;
 }
 
 /* Sidebar controls */
@@ -379,7 +380,9 @@ button.loading .btn-spinner {
     box-shadow: var(--shadow-sm);
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    min-height: 420px;
+    height: 100%;
+    max-height: calc(100vh - 200px);
     overflow: hidden;
 }
 
@@ -532,8 +535,9 @@ button.loading .btn-spinner {
     }
 
     .editor-section {
-        min-height: 420px;
+        min-height: 360px;
         height: 50vh;
+        max-height: none;
     }
 }
 

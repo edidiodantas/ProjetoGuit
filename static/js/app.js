@@ -80,10 +80,25 @@ async function main() {
     }
   }
 
-  let { originalModel, modifiedModel, diffEditor } = await initEditors(
-    originalContainer,
-    diffContainer
-  );
+  let originalModel = null;
+  let modifiedModel = null;
+  let diffEditor = null;
+
+  try {
+    ({ originalModel, modifiedModel, diffEditor } = await initEditors(
+      originalContainer,
+      diffContainer
+    ));
+  } catch (editorError) {
+    setStatus(
+      "Não foi possível carregar o editor de código. " +
+      "Verifique sua conexão com a internet e recarregue a página. " +
+      "Erro: " + editorError.message,
+      "error"
+    );
+    console.error("Falha ao carregar o Monaco Editor:", editorError);
+    return;
+  }
 
   async function onCompose(event) {
     if (event) {

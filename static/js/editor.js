@@ -16,6 +16,11 @@ export async function loadMonaco() {
       return;
     }
 
+    if (typeof require === "undefined") {
+      reject(new Error("Monaco loader (require.js) não foi carregado. Verifique sua conexão com a internet."));
+      return;
+    }
+
     require.config({
       paths: {
         vs: "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.0/min/vs",
@@ -26,9 +31,11 @@ export async function loadMonaco() {
       if (window.monaco) {
         resolve(window.monaco);
       } else {
-        reject(new Error("Monaco editor failed to load"));
+        reject(new Error("Monaco editor não foi inicializado pelo loader."));
       }
-    }, reject);
+    }, (err) => {
+      reject(new Error("Falha ao carregar o Monaco Editor. Verifique sua conexão com a internet."));
+    });
   });
 }
 
