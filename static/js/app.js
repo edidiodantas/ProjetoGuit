@@ -188,7 +188,7 @@ async function main() {
 
   // Ajusta o estado inicial.
   showDiffEmptyState(true);
-  setStatus("Pronto. Cole seu código, escreva o prompt e clique em Compor.", "info");
+  setStatus("Pronto. Cole seu código, escreva o prompt e clique em Construir.", "info");
 }
 
 main().catch((error) => {
