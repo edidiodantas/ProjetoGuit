@@ -37,7 +37,7 @@ Ele é útil para:
    http://localhost:8000
    ```
 
-Você verá duas áreas principais: o editor com seu código original à esquerda e, depois de usar o botão **Compor**, o diff com a sugestão à direita.
+Você verá três áreas principais: a barra de controles no topo, o editor com seu código original à esquerda e, depois de usar o botão **Construir**, o diff com a sugestão à direita.
 
 ---
 
@@ -47,7 +47,7 @@ Você verá duas áreas principais: o editor com seu código original à esquerd
 2. Cole ou edite o código no editor **Original**.
 3. Escreva no campo **Prompt** o que você quer que o Kimi faça, por exemplo:
    "Adicione tratamento de erros e anotações de tipo".
-4. Clique em **Compor** ou pressione `Ctrl+Enter` / `Cmd+Enter` para enviar.
+4. Clique em **Construir** ou pressione `Ctrl+Enter` / `Cmd+Enter` para enviar.
 5. Aguarde a resposta. O botão entra em estado de carregamento e a caixa de status mostra o andamento.
 6. Revise o diff. Se quiser recomeçar, clique em **Redefinir**.
 
@@ -95,7 +95,7 @@ Depois que a resposta aparecer:
 
 - **Aceitar:** clique no botão **Aplicar** (ou equivalente) para copiar a sugestão para o editor original.
 - **Rejeitar:** clique em **Rejeitar** para descartar a sugestão e continuar com seu código.
-- **Tentar de novo:** edite o prompt e clique em **Compor** novamente.
+- **Tentar de novo:** edite o prompt e clique em **Construir** novamente.
 
 Não se preocupe em errar: a versão original fica salva até você decidir aplicar.
 
@@ -103,18 +103,19 @@ Não se preocupe em errar: a versão original fica salva até você decidir apli
 
 ## Interface e feedback visual
 
-A interface foi projetada para ser clara e confortável:
+A interface foi projetada para ser clara, compacta e caber em uma única tela:
 
-- **Cabeçalho** centralizado com título e descrição.
-- **Painel de controle** com rótulos claros, botão primário **Compor** e botão secundário **Redefinir**.
+- **Cabeçalho** no topo com o nome do app e uma breve descrição.
+- **Barra de controles** horizontal abaixo do cabeçalho, com seleção de linguagem, campo de prompt, botão primário **Construir** e botão secundário **Redefinir**.
 - **Caixa de status** colorida abaixo dos controles:
   - **Azul**: informação (carregando, instrução inicial).
-  - **Verde**: sucesso na composição.
+  - **Verde**: sucesso na construção.
   - **Amarela**: aviso, como prompt ou código vazio.
   - **Vermelha**: erro na API ou no servidor.
-- **Estado vazio** no editor de diferença explica o que fazer antes da primeira composição.
+- **Dois editores** lado a lado: o código **Original** à esquerda e a **Diferença** à direita.
+- **Estado vazio** no editor de diferença explica o que fazer antes da primeira construção.
 
-Durante uma requisição, os botões ficam desabilitados e o botão **Compor** mostra um spinner.
+Durante uma requisição, os botões ficam desabilitados e o botão **Construir** mostra um spinner.
 
 ---
 
@@ -194,7 +195,7 @@ A interface traduz os erros da API em mensagens claras em português:
 2. **Sempre leia o código sugerido.** A IA pode cometer erros ou inventar funções que não existem.
 3. **Use a ferramenta para aprender, não para copiar.** Tente entender por que a sugestão foi feita.
 4. **Não envie dados pessoais ou senhas.** O código vai para a API da Moonshot.
-5. **No plano gratuito, economize chamadas.** Espere ter uma ideia clara do que pedir antes de clicar em **Compor**.
+5. **No plano gratuito, economize chamadas.** Espere ter uma ideia clara do que pedir antes de clicar em **Construir**.
 
 ---
 

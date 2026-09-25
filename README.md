@@ -79,7 +79,7 @@ python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --log-level info
 
 Acesse http://localhost:8000 no navegador.
 
-Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Compor** retornará um erro `401` até que a chave seja configurada. Se a cota gratuita acabar, a interface mostrará uma mensagem sobre limite de requisições atingido (`429`).
+Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Construir** retornará um erro `401` até que a chave seja configurada. Se a cota gratuita acabar, a interface mostrará uma mensagem sobre limite de requisições atingido (`429`).
 
 Veja o guia passo a passo em [`docs/manual.md`](docs/manual.md).
 
