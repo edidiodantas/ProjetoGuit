@@ -62,6 +62,7 @@ export async function initEditors(originalContainer, diffContainer) {
 
   const originalEditor = monaco.editor.create(originalContainer, {
     model: originalModel,
+    theme: "vs",
     automaticLayout: true,
     minimap: { enabled: false },
     scrollBeyondLastLine: false,
@@ -69,6 +70,7 @@ export async function initEditors(originalContainer, diffContainer) {
   });
 
   const diffEditor = monaco.editor.createDiffEditor(diffContainer, {
+    theme: "vs",
     automaticLayout: true,
     readOnly: true,
     renderSideBySide: true,
