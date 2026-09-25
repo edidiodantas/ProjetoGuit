@@ -61,10 +61,21 @@ body {
 
 /* Header */
 .app-header {
-    background: var(--surface);
+    background: linear-gradient(90deg, var(--surface) 0%, var(--google-blue-bg) 100%);
     border-bottom: 1px solid var(--border-subtle);
     padding: 0.5rem 1rem;
     flex-shrink: 0;
+}
+
+.app-header h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    background: linear-gradient(90deg, var(--google-blue) 0%, var(--google-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
 .app-header-inner {
@@ -74,14 +85,6 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-}
-
-.app-header h1 {
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text);
-    white-space: nowrap;
 }
 
 .app-header p {

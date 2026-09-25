@@ -65,6 +65,9 @@ export function disposeModel(model) {
 export async function initEditors(originalContainer, diffContainer) {
   const monaco = await loadMonaco();
 
+  // Garante o tema claro por padrão, combinando com a interface.
+  monaco.editor.setTheme("vs");
+
   const originalModel = createModel(monaco, DEFAULT_CODE, DEFAULT_LANGUAGE);
 
   const originalEditor = monaco.editor.create(originalContainer, {
