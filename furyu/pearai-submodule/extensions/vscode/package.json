@@ -1,0 +1,807 @@
+{
+  "_comment": "This file has been modified significantly from its original contents. New commands have been added, and there has been renaming from Continue to PearAI. pearai-submodule is a fork of Continue (https://github.com/continuedev/continue).",
+  "name": "pearai",
+  "publisher": "pearai",
+  "icon": "media/icon.png",
+  "version": "2.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trypear/pearai-submodule"
+  },
+  "extensionKind": [
+    "ui",
+    "workspace"
+  ],
+  "bugs": {
+    "url": "https://github.com/trypear/pearai-app/issues"
+  },
+  "exports": {
+    ".": {
+      "types": "./out/index.d.ts",
+      "default": "./out/extension.js"
+    }
+  },
+  "homepage": "https://trypear.ai",
+  "qna": "https://github.com/trypear/pearai-app/issues/new/choose",
+  "displayName": "PearAI",
+  "license": "Apache-2.0",
+  "pricing": "Free",
+  "description": "Supercharge your development with AI",
+  "engines": {
+    "vscode": "^1.70.0",
+    "node": ">=20.18.0"
+  },
+  "engine-strict": true,
+  "galleryBanner": {
+    "color": "#1E1E1E",
+    "theme": "dark"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Programming Languages",
+    "Education",
+    "Machine Learning",
+    "Snippets"
+  ],
+  "keywords": [
+    "chatgpt",
+    "github",
+    "copilot",
+    "claude",
+    "sonnet",
+    "mistral",
+    "codestral",
+    "codegpt",
+    "ai",
+    "llama"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "browser": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "filenames": [
+          "config.json",
+          ".pearairc.json"
+        ],
+        "id": "jsonc"
+      }
+    ],
+    "configuration": {
+      "title": "PearAI",
+      "properties": {
+        "pearai.telemetryEnabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "PearAI collects anonymous usage data, cleaned of PII, to help us improve the product for our users. Read more  at [pearai.dev › Telemetry](https://trypear.ai/telemetry)."
+        },
+        "pearai.enableContinueForTeams": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "_(Requires window reload)_ Enable PearAI for teams beta features. To sign in, click the person icon in the bottom right of the sidebar."
+        },
+        "pearai.showInlineTip": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show inline suggestion to use the PearAI keyboard shortcuts (e.g. \"Cmd/Ctrl L to select code, Cmd/Ctrl I to edit\")."
+        },
+        "pearai.enableQuickActions": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable the experimental Quick Actions feature. Read our walkthrough to learn about configuration and how to share feedback: [pearai.dev › Walkthrough: Quick Actions (experimental)](https://trypear.ai/features/quick-actions)"
+        },
+        "pearai.enableTabAutocomplete": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Enable PearAI's tab autocomplete feature. Read our walkthrough to learn about configuration and how to share feedback: [pearai.dev › Walkthrough: Tab Autocomplete (beta)](https://trypear.ai/docs/tab-autocomplete)"
+        },
+        "pearai.pauseTabAutocompleteOnBattery": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Pause PearAI's tab autocomplete feature when your battery is low."
+        },
+        "pearai.pauseCodebaseIndexOnStart": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Pause PearAI's codebase index on start."
+        },
+        "pearai.enableDebugLogs": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Enable PearAI Debug Logs in the Output panel."
+        },
+        "pearai.remoteConfigServerUrl": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "If your team is set up to use shared configuration, enter the server URL here and your user token below to enable automatic syncing."
+        },
+        "pearai.userToken": {
+          "type": "string",
+          "default": null,
+          "markdownDescription": "If your team is set up to use shared configuration, enter your user token here and your server URL above to enable automatic syncing."
+        },
+        "pearai.remoteConfigSyncPeriod": {
+          "type": "number",
+          "default": 60,
+          "description": "The period of time in minutes between automatic syncs."
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "pearai.acceptDiff",
+        "category": "PearAI",
+        "title": "Accept Diff",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.rejectDiff",
+        "category": "PearAI",
+        "title": "Reject Diff",
+        "group": "PearAI",
+        "icon": "$(stop)"
+      },
+      {
+        "command": "pearai.acceptVerticalDiffBlock",
+        "category": "PearAI",
+        "title": "Accept Vertical Diff Block",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.rejectVerticalDiffBlock",
+        "category": "PearAI",
+        "title": "Reject Vertical Diff Block",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.quickEdit",
+        "category": "PearAI",
+        "title": "Generate Code",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleCreator",
+        "category": "PearAI",
+        "title": "Toggle PearAI Creator",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleSearch",
+        "category": "PearAI",
+        "title": "Toggle PearAI Search",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleMem0",
+        "category": "PearAI",
+        "title": "Toggle PearAI Memory",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleInventorySettings",
+        "category": "PearAI",
+        "title": "Toggle PearAI Inventory",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.startOnboarding",
+        "category": "PearAI Developer",
+        "title": "Start PearAI Onboarding",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.developer.restFirstLaunch",
+        "category": "PearAI Developer",
+        "title": "Reset PearAI Onboarding",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.focusAgentView",
+        "category": "PearAI",
+        "title": "Focus PearAI Agent View",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.focusPearAISearchView",
+        "category": "PearAI",
+        "title": "Focus PearAI Search View",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.focusPearAIMem0View",
+        "category": "PearAI",
+        "title": "Focus PearAI Memory View",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.focusContinueInput",
+        "category": "PearAI",
+        "title": "Add Highlighted Code to Context",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.focusContinueInputWithoutClear",
+        "category": "PearAI",
+        "title": "Add Highlighted Code to Context",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.debugTerminal",
+        "category": "PearAI",
+        "title": "PearAI: Debug Terminal",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleFullScreen",
+        "category": "PearAI",
+        "title": "Toggle Full Screen",
+        "icon": "$(fullscreen)",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.openConfigJson",
+        "category": "PearAI",
+        "title": "Open config.json",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.openPearAiWelcome",
+        "category": "PearAI",
+        "title": "Open Welcome page for PearAI",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.toggleTabAutocompleteEnabled",
+        "category": "PearAI",
+        "title": "Toggle Autocomplete Enabled",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.selectFilesAsContext",
+        "category": "PearAI",
+        "title": "PearAI: Select Files as Context",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.newSession",
+        "category": "PearAI",
+        "title": "New Session",
+        "icon": "$(add)",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.newSessionSearch",
+        "category": "PearAI",
+        "title": "New Search Session",
+        "icon": "$(add)",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.viewHistory",
+        "category": "PearAI",
+        "title": "View History",
+        "icon": "$(history)",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.viewHistorySearch",
+        "category": "PearAI",
+        "title": "View Search History",
+        "icon": "$(history)",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.writeCommentsForCode",
+        "category": "PearAI",
+        "title": "Write Comments for this Code",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.writeDocstringForCode",
+        "category": "PearAI",
+        "title": "Write a Docstring for this Code",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.fixCode",
+        "category": "PearAI",
+        "title": "Fix this Code",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.optimizeCode",
+        "category": "PearAI",
+        "title": "Optimize this Code",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.fixGrammar",
+        "category": "PearAI",
+        "title": "Fix Grammar / Spelling",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.codebaseForceReIndex",
+        "category": "PearAI",
+        "title": "Codebase Force Re-Index",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.docsIndex",
+        "category": "PearAI",
+        "title": "Docs Index",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.docsReIndex",
+        "category": "PearAI",
+        "title": "Docs Force Re-Index",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.login",
+        "category": "PearAI",
+        "title": "Login to PearAI",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.logout",
+        "category": "PearAI",
+        "title": "Logout of PearAI",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.manualLogin",
+        "category": "PearAI Developer",
+        "title": "Manual PearAI Login",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.loadRecentChat",
+        "category": "PearAI",
+        "title": "Load Recent Chat",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.resizeAuxiliaryBarWidth",
+        "category": "PearAI",
+        "title": "Resize Chat",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.macResizeAuxiliaryBarWidth",
+        "category": "PearAI",
+        "title": "Big Chat - CMD + [",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.winResizeAuxiliaryBarWidth",
+        "category": "PearAI",
+        "title": "Big Chat - CTRL + [",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.patchWSL",
+        "category": "Shell",
+        "title": "Patch WSL",
+        "group": "Shell"
+      },
+      {
+        "command": "pearai.perplexityMode",
+        "category": "PearAI",
+        "title": "Open PearAI Search",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.showInteractiveContinueTutorial",
+        "category": "PearAI",
+        "title": "Show Chat Tutorial",
+        "group": "PearAI"
+      },
+      {
+        "command": "pearai.notifyOverlayOpened",
+        "title": "Dev - Overlay Opened",
+        "group": "PearAI"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "pearai.toggleOverlay",
+        "mac": "cmd+e",
+        "key": "ctrl+e"
+      },
+      {
+        "command": "pearai.toggleInventorySettings",
+        "mac": "cmd+shift+1",
+        "key": "ctrl+shift+1"
+      },
+      {
+        "command": "pearai.toggleCreator",
+        "mac": "cmd+1",
+        "key": "ctrl+1"
+      },
+      {
+        "command": "pearai.toggleSearch",
+        "mac": "cmd+2",
+        "key": "ctrl+2"
+      },
+      {
+        "command": "pearai.toggleMem0",
+        "mac": "cmd+3",
+        "key": "ctrl+4"
+      },
+      {
+        "command": "pearai.focusContinueInputWithoutClear",
+        "mac": "cmd+shift+l",
+        "key": "ctrl+shift+l"
+      },
+      {
+        "command": "pearai.toggleAuxiliaryBar",
+        "mac": "alt+cmd+l",
+        "key": "alt+ctrl+l"
+      },
+      {
+        "command": "pearai.acceptDiff",
+        "mac": "shift+cmd+enter",
+        "key": "shift+ctrl+enter"
+      },
+      {
+        "command": "pearai.rejectDiff",
+        "mac": "shift+cmd+backspace",
+        "key": "shift+ctrl+backspace"
+      },
+      {
+        "command": "pearai.rejectDiff",
+        "mac": "cmd+z",
+        "key": "ctrl+z",
+        "when": "pearai.diffVisible"
+      },
+      {
+        "command": "pearai.quickEditHistoryUp",
+        "mac": "up",
+        "key": "up",
+        "when": "false && pearai.quickEditHistoryFocused"
+      },
+      {
+        "command": "pearai.quickEditHistoryDown",
+        "mac": "down",
+        "key": "down",
+        "when": "false && pearai.quickEditHistoryFocused"
+      },
+      {
+        "command": "pearai.acceptVerticalDiffBlock",
+        "mac": "alt+cmd+y",
+        "key": "alt+ctrl+y"
+      },
+      {
+        "command": "pearai.rejectVerticalDiffBlock",
+        "mac": "alt+cmd+n",
+        "key": "alt+ctrl+n"
+      },
+      {
+        "command": "pearai.quickEdit",
+        "mac": "cmd+i",
+        "key": "ctrl+i"
+      },
+      {
+        "command": "pearai.debugTerminal",
+        "mac": "cmd+shift+r",
+        "key": "ctrl+shift+r"
+      },
+      {
+        "command": "pearai.toggleFullScreen",
+        "mac": "cmd+k cmd+m",
+        "key": "ctrl+k ctrl+m",
+        "when": "!terminalFocus"
+      },
+      {
+        "command": "pearai.toggleTabAutocompleteEnabled",
+        "mac": "cmd+k cmd+a",
+        "key": "ctrl+k ctrl+a",
+        "when": "!terminalFocus"
+      },
+      {
+        "command": "pearai.loadRecentChat",
+        "mac": "cmd+0",
+        "key": "ctrl+0"
+      },
+      {
+        "command": "pearai.resizeAuxiliaryBarWidth",
+        "mac": "cmd+\\",
+        "key": "ctrl+\\"
+      },
+      {
+        "command": "pearai.viewHistory",
+        "mac": "cmd+h",
+        "key": "ctrl+h"
+      }
+    ],
+    "submenus": [
+      {
+        "id": "pearai.continueSubMenu",
+        "label": "PearAI"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "pearai.quickEdit"
+        },
+        {
+          "command": "pearai.toggleCreator"
+        },
+        {
+          "command": "pearai.toggleSearch"
+        },
+        {
+          "command": "pearai.toggleInventorySettings"
+        },
+        {
+          "command": "pearai.focusContinueInput"
+        },
+        {
+          "command": "pearai.focusContinueInputWithoutClear"
+        },
+        {
+          "command": "pearai.debugTerminal"
+        },
+        {
+          "command": "pearai.toggleFullScreen"
+        },
+        {
+          "command": "pearai.newSession"
+        },
+        {
+          "command": "pearai.showInteractiveContinueTutorial"
+        }
+      ],
+      "editor/context": [
+        {
+          "submenu": "pearai.continueSubMenu",
+          "group": "0_acontinue"
+        }
+      ],
+      "editor/title/run": [
+        {
+          "command": "pearai.rejectDiff",
+          "group": "PearAI",
+          "when": "pearai.streamingDiff"
+        }
+      ],
+      "pearai.continueSubMenu": [
+        {
+          "command": "pearai.focusContinueInputWithoutClear",
+          "group": "PearAI",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "pearai.writeCommentsForCode",
+          "group": "PearAI",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "pearai.writeDocstringForCode",
+          "group": "PearAI",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "pearai.fixCode",
+          "group": "PearAI",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "pearai.optimizeCode",
+          "group": "PearAI",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "pearai.fixGrammar",
+          "group": "PearAI",
+          "when": "editorHasSelection && editorLangId == 'markdown'"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "pearai.selectFilesAsContext",
+          "group": "1_debug@1"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "pearai.newSession",
+          "group": "navigation@1",
+          "when": "view == pearai.chatView"
+        },
+        {
+          "command": "pearai.newSessionSearch",
+          "group": "navigation@1",
+          "when": "view == pearai.searchView"
+        },
+        {
+          "command": "pearai.toggleFullScreen",
+          "group": "navigation@1",
+          "when": "view == pearai.chatView"
+        },
+        {
+          "command": "pearai.viewHistory",
+          "group": "navigation@1",
+          "when": "view == pearai.chatView"
+        },
+        {
+          "command": "pearai.viewHistorySearch",
+          "group": "navigation@1",
+          "when": "view == pearai.searchView"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "pearai.toggleFullScreen",
+          "group": "navigation@1",
+          "when": "activeWebviewPanelId == pearai.chatView || activeWebviewPanelId == pearai.searchView"
+        }
+      ],
+      "terminal/context": [
+        {
+          "command": "pearai.debugTerminal",
+          "group": "navigation@top"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "auxiliarybar": [
+        {
+          "id": "pearaiChat",
+          "title": "PearAI Chat",
+          "icon": "media/sidebar-icon.png"
+        },
+        {
+          "id": "pearaiSearch",
+          "title": "PearAI Search",
+          "icon": "media/sidebar-icon.png"
+        },
+        {
+          "id": "pearaiMemory",
+          "title": "PearAI Memory",
+          "icon": "media/sidebar-icon.png"
+        }
+      ]
+    },
+    "views": {
+      "pearaiChat": [
+        {
+          "type": "webview",
+          "id": "pearai.chatView",
+          "name": "PearAI Chat",
+          "visibility": "visible"
+        }
+      ],
+      "pearaiSearch": [
+        {
+          "type": "webview",
+          "id": "pearai.searchView",
+          "name": "PearAI Search",
+          "visibility": "visible"
+        }
+      ],
+      "pearaiMemory": [
+        {
+          "type": "webview",
+          "id": "pearai.mem0View",
+          "name": "PearAI Memory",
+          "visibility": "visible"
+        }
+      ]
+    },
+    "jsonValidation": [
+      {
+        "fileMatch": "config.json",
+        "url": "./config_schema.json"
+      },
+      {
+        "fileMatch": ".pearairc.json",
+        "url": "./continue_rc_schema.json"
+      }
+    ]
+  },
+  "scripts": {
+    "esbuild-base": "node scripts/esbuild.js",
+    "vscode:prepublish": "npm run esbuild-base -- --minify",
+    "esbuild": "npm run esbuild-base -- --sourcemap",
+    "esbuild-watch": "npm run esbuild-base -- --sourcemap --watch",
+    "tsc": "tsc -p ./",
+    "tsc-watch": "tsc -watch -p ./",
+    "rebuild": "electron-rebuild -v 19.1.8 node-pty",
+    "lint": "eslint src --ext ts",
+    "build-test": "npm run esbuild && node esbuild.test.mjs",
+    "test": "npm run build-test && node ./out/runTestOnVSCodeHost.js",
+    "quick-test": "npm run build-test && node ./out/runTestOnVSCodeHost.js",
+    "prepackage": "node scripts/prepackage.js",
+    "package": "node scripts/package.js",
+    "package-all": "node scripts/package-all.js",
+    "package:pre-release": "node scripts/package.js --pre-release",
+    "build:rust": "cargo-cp-artifact -ac sync sync.node -- cargo build --manifest-path ../../sync/Cargo.toml --message-format=json-render-diagnostics",
+    "build-debug:rust": "npm run build:rust --",
+    "build-release:rust": "npm run build:rust -- --release"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.6.4",
+    "@nestjs/common": "^8.4.7",
+    "@openapitools/openapi-generator-cli": "^2.5.2",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/follow-redirects": "^1.14.4",
+    "@types/glob": "^8.0.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.17.30",
+    "@types/react-dom": "^18.2.4",
+    "@types/request": "^2.48.8",
+    "@types/vscode": "1.70",
+    "@types/ws": "^8.5.4",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/vsce": "^2.22.0",
+    "cargo-cp-artifact": "^0.1",
+    "esbuild": "0.17.19",
+    "eslint": "^8.28.0",
+    "glob": "^8.0.3",
+    "json-schema-to-typescript": "^12.0.0",
+    "mocha": "^10.4.0",
+    "ovsx": "^0.8.3",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3",
+    "vite": "^4.3.9",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "@electron/rebuild": "^3.2.10",
+    "@reduxjs/toolkit": "^1.9.3",
+    "@types/node-fetch": "^2.6.11",
+    "@types/uuid": "^9.0.8",
+    "@vscode/ripgrep": "^1.15.9",
+    "@vscode/test-electron": "^2.3.9",
+    "axios": "^1.2.5",
+    "core": "file:../../core",
+    "cors": "^2.8.5",
+    "dbinfoz": "^0.1.4",
+    "downshift": "^7.6.0",
+    "esbuild": "^0.17.19",
+    "express": "^4.18.2",
+    "fkill": "^8.1.0",
+    "follow-redirects": "^1.15.4",
+    "handlebars": "^4.7.8",
+    "highlight.js": "^11.7.0",
+    "highlightable": "^1.3.0-beta.0",
+    "http-proxy": "^1.18.1",
+    "http-proxy-agent": "^7.0.0",
+    "http-proxy-middleware": "^2.0.6",
+    "https-proxy-agent": "^7.0.2",
+    "ignore": "^5.3.0",
+    "jsdom": "^24.0.0",
+    "minisearch": "^7.0.0",
+    "monaco-editor": "^0.45.0",
+    "monaco-vscode-textmate-theme-converter": "^0.1.7",
+    "ncp": "^2.0.0",
+    "node-fetch": "^3.3.2",
+    "node-machine-id": "^1.1.12",
+    "posthog-node": "^3.6.3",
+    "react-markdown": "^8.0.7",
+    "react-redux": "^8.0.5",
+    "read-last-lines": "^1.8.0",
+    "request": "^2.88.2",
+    "socket.io-client": "^4.7.2",
+    "strip-ansi": "^7.1.0",
+    "systeminformation": "^5.22.10",
+    "tailwindcss": "^3.3.2",
+    "undici": "^6.2.0",
+    "uuid": "^9.0.1",
+    "uuidv4": "^6.2.13",
+    "vectordb": "^0.4.20",
+    "vscode-languageclient": "^8.0.2",
+    "ws": "^8.13.0",
+    "yarn": "^1.22.21"
+  }
+}
