@@ -52,6 +52,8 @@ async function main() {
   const resetBtn = document.getElementById("resetBtn");
   const statusEl = document.getElementById("status");
   const diffEmptyState = document.getElementById("diffEmptyState");
+  const editorsMain = document.querySelector("main");
+  const diffSection = document.querySelector(".diff-section");
 
   let hasComposed = false;
 
@@ -80,12 +82,27 @@ async function main() {
     }
   }
 
+  function setDiffPanelVisible(visible) {
+    editorsMain.classList.toggle("diff-hidden", !visible);
+    diffSection.hidden = !visible;
+    diffSection.setAttribute("aria-hidden", visible ? "false" : "true");
+    requestAnimationFrame(() => {
+      if (originalEditor) {
+        originalEditor.layout();
+      }
+      if (visible && diffEditor) {
+        diffEditor.layout();
+      }
+    });
+  }
+
+  let originalEditor = null;
   let originalModel = null;
   let modifiedModel = null;
   let diffEditor = null;
 
   try {
-    ({ originalModel, modifiedModel, diffEditor } = await initEditors(
+    ({ originalEditor, originalModel, modifiedModel, diffEditor } = await initEditors(
       originalContainer,
       diffContainer
     ));
@@ -143,6 +160,7 @@ async function main() {
 
       hasComposed = true;
       showDiffEmptyState(false);
+      setDiffPanelVisible(true);
       statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (error) {
       setStatus(friendlyErrorMessage(error), "error");
@@ -166,6 +184,7 @@ async function main() {
     }
     hasComposed = false;
     showDiffEmptyState(true);
+    setDiffPanelVisible(false);
     setStatus("");
     promptInput.focus();
   }
@@ -186,8 +205,9 @@ async function main() {
     }
   });
 
-  // Ajusta o estado inicial.
+  // Diff fica oculto até a primeira composição bem-sucedida.
   showDiffEmptyState(true);
+  setDiffPanelVisible(false);
   setStatus("Pronto. Cole seu código, escreva o prompt e clique em Construir.", "info");
 }
 

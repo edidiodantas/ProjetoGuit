@@ -70,23 +70,27 @@ export async function initEditors(originalContainer, diffContainer) {
 
   const originalModel = createModel(monaco, DEFAULT_CODE, DEFAULT_LANGUAGE);
 
-  const originalEditor = monaco.editor.create(originalContainer, {
-    model: originalModel,
+  const chrome = {
     theme: "vs",
     automaticLayout: true,
     minimap: { enabled: false },
+    overviewRulerLanes: 0,
+    hideCursorInOverviewRuler: true,
+    overviewRulerBorder: false,
     scrollBeyondLastLine: false,
     fontSize: 14,
+  };
+
+  const originalEditor = monaco.editor.create(originalContainer, {
+    ...chrome,
+    model: originalModel,
   });
 
   const diffEditor = monaco.editor.createDiffEditor(diffContainer, {
-    theme: "vs",
-    automaticLayout: true,
+    ...chrome,
     readOnly: true,
     renderSideBySide: true,
-    minimap: { enabled: false },
-    scrollBeyondLastLine: false,
-    fontSize: 14,
+    renderOverviewRuler: false,
   });
 
   const modifiedModel = createModel(monaco, DEFAULT_CODE, DEFAULT_LANGUAGE);
