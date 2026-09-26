@@ -37,7 +37,7 @@ def test_static_index_served_at_root(client):
     assert 'class="title-vibe"' in response.text
     assert 'href="/manual"' in response.text
     assert ">Manual<" in response.text
-    assert "/style.css?v=7" in response.text
+    assert "/style.css?v=8" in response.text
     assert "Passo a passo" not in response.text
     marker = 'class="editor-section diff-section"'
     marker_at = response.text.index(marker)
