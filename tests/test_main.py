@@ -31,10 +31,13 @@ def test_static_index_served_at_root(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "IPEIA VIBE CODING" in response.text
+    assert "IPEIA" in response.text
+    assert "VIBE CODING" in response.text
+    assert 'class="title-ipeia"' in response.text
+    assert 'class="title-vibe"' in response.text
     assert 'href="/manual"' in response.text
     assert ">Manual<" in response.text
-    assert "/style.css?v=5" in response.text
+    assert "/style.css?v=6" in response.text
     assert "Passo a passo" not in response.text
     marker = 'class="editor-section diff-section"'
     marker_at = response.text.index(marker)
