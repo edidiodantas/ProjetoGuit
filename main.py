@@ -1,4 +1,4 @@
-"""Aplicação FastAPI para o tutor de código IPEIA_VIBE_CODE."""
+"""Aplicação FastAPI para o tutor de código IPEIA VIBE CODING."""
 
 from __future__ import annotations
 
@@ -39,10 +39,10 @@ async def lifespan(app: FastAPI):
             "retornará 503 até que uma chave de API seja fornecida."
         )
     yield
-    logger.info("Desligando o servidor IPEIA_VIBE_CODE.")
+    logger.info("Desligando o servidor IPEIA VIBE CODING.")
 
 
-app = FastAPI(title="IPEIA_VIBE_CODE", version="0.2.0", lifespan=lifespan)
+app = FastAPI(title="IPEIA VIBE CODING", version="0.2.0", lifespan=lifespan)
 app.state.kimi = KimiService(
     request_timeout=settings.kimi_request_timeout,
     max_code_chars=settings.max_code_chars,
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     import uvicorn
 
     logger.info(
-        "Iniciando servidor IPEIA_VIBE_CODE em %s:%s",
+        "Iniciando servidor IPEIA VIBE CODING em %s:%s",
         settings.app_host,
         settings.app_port,
     )

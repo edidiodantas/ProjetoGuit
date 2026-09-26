@@ -1,6 +1,6 @@
-# IPEIA_VIBE_CODE
+# IPEIA VIBE CODING
 
-Um tutor de código educacional que usa a API Kimi/Moonshot para sugerir melhorias no seu código. A interface mostra o código original ao lado de um diff com as alterações propostas.
+Um tutor de código educacional que usa a API Kimi/Moonshot para sugerir melhorias no seu código. A interface mostra o código original e, logo abaixo, um diff com as alterações propostas.
 
 ## Funcionalidades
 

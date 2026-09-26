@@ -1,4 +1,4 @@
-/** Ligação principal da aplicação para a interface do IPEIA_VIBE_CODE. */
+/** Ligação principal da aplicação para a interface do IPEIA VIBE CODING. */
 
 import { DEFAULT_LANGUAGE, DEFAULT_CODE } from "./config.js";
 import { initEditors, setModelLanguage, disposeModel, createModel } from "./editor.js";
@@ -52,10 +52,6 @@ async function main() {
   const resetBtn = document.getElementById("resetBtn");
   const statusEl = document.getElementById("status");
   const diffEmptyState = document.getElementById("diffEmptyState");
-  const editorsMain = document.querySelector("main");
-  const diffSection = document.querySelector(".diff-section");
-
-  let hasComposed = false;
 
   function setStatus(message, type = "") {
     statusEl.textContent = message;
@@ -82,15 +78,12 @@ async function main() {
     }
   }
 
-  function setDiffPanelVisible(visible) {
-    editorsMain.classList.toggle("diff-hidden", !visible);
-    diffSection.hidden = !visible;
-    diffSection.setAttribute("aria-hidden", visible ? "false" : "true");
+  function layoutEditors() {
     requestAnimationFrame(() => {
       if (originalEditor) {
         originalEditor.layout();
       }
-      if (visible && diffEditor) {
+      if (diffEditor) {
         diffEditor.layout();
       }
     });
@@ -158,9 +151,8 @@ async function main() {
       modifiedModel = createModel(window.monaco, updatedCode, language);
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
 
-      hasComposed = true;
       showDiffEmptyState(false);
-      setDiffPanelVisible(true);
+      layoutEditors();
       statusEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
     } catch (error) {
       setStatus(friendlyErrorMessage(error), "error");
@@ -182,9 +174,8 @@ async function main() {
       modifiedModel = createModel(window.monaco, DEFAULT_CODE, DEFAULT_LANGUAGE);
       diffEditor.setModel({ original: originalModel, modified: modifiedModel });
     }
-    hasComposed = false;
     showDiffEmptyState(true);
-    setDiffPanelVisible(false);
+    layoutEditors();
     setStatus("");
     promptInput.focus();
   }
@@ -205,12 +196,11 @@ async function main() {
     }
   });
 
-  // Diff fica oculto até a primeira composição bem-sucedida.
   showDiffEmptyState(true);
-  setDiffPanelVisible(false);
+  layoutEditors();
   setStatus("Pronto. Cole seu código, escreva o prompt e clique em Construir.", "info");
 }
 
 main().catch((error) => {
-  console.error("Falha ao iniciar a interface IPEIA_VIBE_CODE:", error);
+  console.error("Falha ao iniciar a interface IPEIA VIBE CODING:", error);
 });

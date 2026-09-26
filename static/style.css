@@ -1,4 +1,4 @@
-/* IPEIA VIBE CODE — Interface compacta, sem rolagem, fonte Ubuntu */
+/* IPEIA VIBE CODING — Interface compacta, sem rolagem, fonte Ubuntu */
 
 :root {
     /* Google palette */
@@ -331,25 +331,16 @@ button.loading .btn-spinner {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23d93025'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2Zm1 15h-2v-2h2v2Zm0-4h-2V7h2v6Z'/%3E%3C/svg%3E");
 }
 
-/* Main editors */
+/* Main editors: Original em cima, Diferença embaixo, os dois sempre visíveis. */
 main {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
     gap: 0.5rem;
     padding: 0.5rem;
     overflow: hidden;
-}
-
-/* Diff só aparece depois de uma composição bem-sucedida. */
-main.diff-hidden {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-}
-
-main.diff-hidden .diff-section {
-    display: none;
 }
 
 .editor-section {
@@ -470,6 +461,21 @@ main.diff-hidden .diff-section {
 
 /* Responsive */
 @media (max-width: 900px) {
+    html,
+    body {
+        height: auto;
+        overflow: auto;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .app-header h1 {
+        white-space: normal;
+    }
+
     .app-header-inner {
         flex-direction: column;
         align-items: flex-start;
@@ -493,13 +499,17 @@ main.diff-hidden .diff-section {
     }
 
     main {
-        grid-template-columns: 1fr;
-        grid-template-rows: 1fr 1fr;
-        overflow-y: auto;
+        flex: none;
+        overflow: visible;
+        grid-template-rows: minmax(16rem, auto) minmax(16rem, auto);
     }
 
-    main.diff-hidden {
-        grid-template-rows: 1fr;
+    .editor-section {
+        min-height: 16rem;
+    }
+
+    .editor-wrapper {
+        min-height: 12rem;
     }
 }
 

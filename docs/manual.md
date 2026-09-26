@@ -1,12 +1,12 @@
-# Manual do IPEIA_VIBE_CODE
+# Manual do IPEIA VIBE CODING
 
-Bem-vindo! Este manual explica como usar o **IPEIA_VIBE_CODE**, um tutor de código que usa a inteligência artificial da Kimi/Moonshot para sugerir melhorias no seu código.
+Bem-vindo! Este manual explica como usar o **IPEIA VIBE CODING**, um tutor de código que usa a inteligência artificial da Kimi/Moonshot para sugerir melhorias no seu código.
 
 ---
 
 ## O que é este app?
 
-O IPEIA_VIBE_CODE é uma ferramenta educacional para aprender programação. Você escreve um código, descreve o que quer mudar (por exemplo, "adicione comentários" ou "corrija os erros") e a IA devolve uma sugestão com as alterações marcadas em um diff.
+O IPEIA VIBE CODING é uma ferramenta educacional para aprender programação. Você escreve um código, descreve o que quer mudar (por exemplo, "adicione comentários" ou "corrija os erros") e a IA devolve uma sugestão com as alterações marcadas em um diff.
 
 Ele é útil para:
 
@@ -21,7 +21,7 @@ Ele é útil para:
 1. No terminal, entre na pasta do projeto:
 
    ```bash
-   cd /caminho/para/IPEIA_VIBE_CODE
+   cd "/caminho/para/IPEIA VIBE CODING"
    ```
 
 2. Ative o ambiente virtual e inicie o servidor:
@@ -37,7 +37,7 @@ Ele é útil para:
    http://localhost:8000
    ```
 
-Você verá três áreas principais: a barra de controles no topo, o editor com seu código original à esquerda e, depois de usar o botão **Construir**, o diff com a sugestão à direita.
+Você verá a barra de controles no topo, o editor **Original** e, logo abaixo dele, o painel **Diferença**. O painel de diferença fica visível desde o início; antes do primeiro **Construir** ele mostra uma dica de que ainda não há sugestão.
 
 ---
 
@@ -112,7 +112,7 @@ A interface foi projetada para ser clara, compacta e caber em uma única tela:
   - **Verde**: sucesso na construção.
   - **Amarela**: aviso, como prompt ou código vazio.
   - **Vermelha**: erro na API ou no servidor.
-- **Dois editores** lado a lado: o código **Original** à esquerda e a **Diferença** à direita.
+- **Dois editores** empilhados: o código **Original** em cima e a **Diferença** embaixo.
 - **Estado vazio** no editor de diferença explica o que fazer antes da primeira construção.
 
 Durante uma requisição, os botões ficam desabilitados e o botão **Construir** mostra um spinner.
@@ -125,8 +125,8 @@ Durante uma requisição, os botões ficam desabilitados e o botão **Construir*
 - A caixa de status usa `aria-live`, então leitores de tela anunciam as mensagens automaticamente.
 - Foco visível em todos os controles interativos.
 - A aplicação respeita a preferência `prefers-reduced-motion`.
-- Em telas maiores, os editores aparecem lado a lado.
-- Abaixo de **1024 px**, os editores se empilham verticalmente.
+- Em uma tela de desktop, os dois editores cabem na primeira tela, um acima do outro, e a rolagem fica dentro de cada editor.
+- Abaixo de cerca de **900 px**, a mesma pilha é usada e a página pode rolar se os dois editores não couberem.
 - Em telas pequenas (até **640 px**), os controles também se empilham e os botões ocupam a largura total.
 
 ---

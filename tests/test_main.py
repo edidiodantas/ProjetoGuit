@@ -31,7 +31,14 @@ def test_static_index_served_at_root(client):
     response = client.get("/")
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
-    assert "IPEIA VIBE CODE" in response.text
+    assert "IPEIA VIBE CODING" in response.text
+    marker = 'class="editor-section diff-section"'
+    marker_at = response.text.index(marker)
+    tag_start = response.text.rfind("<section", 0, marker_at)
+    tag_end = response.text.index(">", marker_at)
+    diff_tag = response.text[tag_start:tag_end]
+    assert "hidden" not in diff_tag
+    assert "diff-hidden" not in response.text
 
 
 def test_static_js_module_served(client):
