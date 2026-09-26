@@ -1,0 +1,35 @@
+{
+  "splash": {
+    "title": "Welcome to PearAI",
+    "subtitle": "The AI Code Editor For Your Next Project",
+    "useOnThisComputer": "Use on this computer",
+    "useOnlineModel": "Use an online model"
+  },
+  "login": {
+    "title": "Welcome to PearAI!",
+    "subtitle": "Begin your journey by logging in",
+    "submit": "Log in",
+    "afterLogin": "After login, the website should redirect you back here.",
+    "trouble": "Having trouble logging in? Open PearAI from the dashboard on the website.",
+    "skip": "Skip",
+    "skipConfirm": "Are you sure you want to skip logging in? Unless you are an existing user or already have a config.json, we don't recommend this."
+  },
+  "local": {
+    "title": "Set up your local LLM",
+    "downloadOllama": "1. Download and start Ollama",
+    "downloadLink": "Click here to download Ollama from their site.",
+    "afterDownload": "Once downloaded, start the application. This page will refresh once you've started Ollama.",
+    "checking": "Checking for connection to Ollama...",
+    "downloadChat": "2. Download a model for chat",
+    "chatRecommendation": "We recommend using {{model}}, the latest open-source model trained by Meta.",
+    "downloadAutocomplete": "3. Download a model for tab autocomplete",
+    "autocompleteRecommendation": "We recommend using {{model}}, a state-of-the-art 3B parameter autocomplete model trained by Hugging Face.",
+    "downloadEmbeddings": "4. Download a model for embeddings",
+    "embeddingsRecommendation": "We recommend using {{model}}, a 8192 context-length model that outperforms OpenAI ada-002 and text-embedding-3-small on both short and long context tasks.",
+    "complete": "Complete onboarding"
+  },
+  "profiles": {
+    "local": "On this computer",
+    "online": "Online model"
+  }
+}

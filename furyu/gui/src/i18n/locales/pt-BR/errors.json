@@ -1,0 +1,7 @@
+{
+  "timeout": "A conexão expirou. Se a conexão deve demorar, aumente o tempo em config.json com \"requestOptions\": { \"timeout\": 10000 }. A referência completa da configuração está em https://trypear.ai/reference/config",
+  "connectionRefused": "A conexão foi recusada. Isso costuma indicar que não há um servidor no endereço informado. Se o servidor é seu, defina o parâmetro \"apiBase\" em config.json. Um exemplo de servidor compatível com a OpenAI está em https://trypear.ai/reference/Model%20Providers/openai#openai-compatible-servers--apis",
+  "generic": "A requisição falhou com \"{{name}}\": {{message}}. Se a configuração do PearAI não funcionar, consulte o guia de solução de problemas.",
+  "ollamaMissing": "Modelo local não encontrado. Verifique se o Ollama está rodando ou mude para o modo Online.",
+  "switchToOnline": "Mudar para o modo Online"
+}

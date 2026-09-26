@@ -1,0 +1,35 @@
+{
+  "splash": {
+    "title": "Bem-vindo ao PearAI",
+    "subtitle": "O editor de código com IA para o seu próximo projeto",
+    "useOnThisComputer": "Usar neste computador",
+    "useOnlineModel": "Usar um modelo online"
+  },
+  "login": {
+    "title": "Bem-vindo ao PearAI!",
+    "subtitle": "Comece a jornada fazendo login",
+    "submit": "Entrar",
+    "afterLogin": "Depois do login, o site deve trazer você de volta para cá.",
+    "trouble": "Problemas para entrar? Abra o PearAI pelo painel no site.",
+    "skip": "Pular",
+    "skipConfirm": "Tem certeza de que quer pular o login? Se você não é um usuário existente e ainda não tem um config.json, não recomendamos isso."
+  },
+  "local": {
+    "title": "Configure o modelo local",
+    "downloadOllama": "1. Baixe e inicie o Ollama",
+    "downloadLink": "Clique aqui para baixar o Ollama no site deles.",
+    "afterDownload": "Depois de baixar, abra o aplicativo. Esta página atualiza quando o Ollama estiver em execução.",
+    "checking": "Verificando a conexão com o Ollama...",
+    "downloadChat": "2. Baixe um modelo para o chat",
+    "chatRecommendation": "Recomendamos {{model}}, o modelo aberto mais recente treinado pela Meta.",
+    "downloadAutocomplete": "3. Baixe um modelo para o autocomplete",
+    "autocompleteRecommendation": "Recomendamos {{model}}, um modelo de autocomplete de 3 bilhões de parâmetros treinado pela Hugging Face.",
+    "downloadEmbeddings": "4. Baixe um modelo para embeddings",
+    "embeddingsRecommendation": "Recomendamos {{model}}, com contexto de 8192 tokens, que supera os modelos ada-002 e text-embedding-3-small da OpenAI em tarefas curtas e longas.",
+    "complete": "Concluir configuração"
+  },
+  "profiles": {
+    "local": "Neste computador",
+    "online": "Modelo online"
+  }
+}
