@@ -1,282 +1,71 @@
 # Manual do IPEIA VIBE CODING
 
-Bem-vindo! Este manual explica como usar o **IPEIA VIBE CODING**, um tutor de código que usa a inteligência artificial da Kimi/Moonshot para sugerir melhorias no seu código.
+Este guia mostra como usar o **IPEIA VIBE CODING**, um tutor de código para estudantes. Você escreve um programa, pede uma melhoria em português e compara a sugestão com o que escreveu.
 
----
+## O que é esta tela
 
-## O que é este app?
+A tela principal cabe em uma única janela no computador, sem rolagem da página. O visual é claro (tema claro), com a fonte Ubuntu.
 
-O IPEIA VIBE CODING é uma ferramenta educacional para aprender programação. Você escreve um código, descreve o que quer mudar (por exemplo, "adicione comentários" ou "corrija os erros") e a IA devolve uma sugestão com as alterações marcadas em um diff.
+De cima para baixo:
 
-Ele é útil para:
+- O nome **IPEIA VIBE CODING** e, ao lado, o botão **Manual**, que abre este guia.
+- A barra de controles: menu **Linguagem**, campo **Prompt**, botão **Construir** e botão **Redefinir**.
+- Uma caixa de status colorida. Azul é informação, verde é sucesso, amarelo é aviso e vermelho é erro.
+- O editor **Original**, onde fica o seu código.
+- O painel **Diferença**, logo abaixo do Original. Ele fica visível o tempo todo. Antes do primeiro **Construir**, mostra a mensagem "Nenhuma sugestão ainda".
 
-- Entender como melhorar trechos de código.
-- Aprender novas formas de escrever a mesma lógica.
-- Revisar códigos antes de entregar em exercícios.
+A rolagem acontece dentro de cada editor, não na página.
 
----
+## Passo a passo
 
-## Como abrir o app
+1. **Escolha a linguagem** no menu (Python, JavaScript, HTML e outras). Use a linguagem do código que você vai colar.
+2. **Cole ou edite o código** no editor **Original**. Você pode mudar o exemplo que já vem na tela.
+3. **Escreva o prompt** no campo Prompt. Diga com clareza o que a IA deve fazer. Exemplos: "Adicione tratamento de erros" ou "Explique este código e corrija os erros".
+4. **Clique em Construir.** Também vale pressionar `Ctrl+Enter` (ou `Cmd+Enter` no Mac). O botão mostra um indicador de espera enquanto a resposta não chega.
+5. **Leia a explicação** na caixa de status, embaixo dos botões. Em caso de sucesso ela fica verde e traz a primeira frase da explicação da IA.
+6. **Compare o Original com a Diferença.** O Original continua em cima, com o código que você enviou. A Diferença fica embaixo e mostra o que mudou: trechos adicionados em verde (ou com `+`) e trechos removidos em vermelho (ou com `-`).
+7. **Clique em Redefinir** quando quiser começar de novo. O prompt é apagado, a linguagem volta para Python, o Original volta ao exemplo inicial e a Diferença mostra outra vez a dica de que ainda não há sugestão.
 
-1. No terminal, entre na pasta do projeto:
+## Modelo gratuito
 
-   ```bash
-   cd "/caminho/para/IPEIA VIBE CODING"
-   ```
+As sugestões vêm da API Kimi/Moonshot. O modelo configurado para o plano gratuito é **kimi-k2.5-lite**. Ele gasta menos e costuma bastar para exercícios e trechos curtos.
 
-2. Ative o ambiente virtual e inicie o servidor:
-
-   ```bash
-   source .venv/bin/activate
-   python3 main.py
-   ```
-
-3. Abra o navegador e acesse:
-
-   ```text
-   http://localhost:8000
-   ```
-
-Você verá a barra de controles no topo, o editor **Original** e, logo abaixo dele, o painel **Diferença**. O painel de diferença fica visível desde o início; antes do primeiro **Construir** ele mostra uma dica de que ainda não há sugestão.
-
----
-
-## Como usar
-
-1. Escolha a linguagem do código no menu suspenso.
-2. Cole ou edite o código no editor **Original**.
-3. Escreva no campo **Prompt** o que você quer que o Kimi faça, por exemplo:
-   "Adicione tratamento de erros e anotações de tipo".
-4. Clique em **Construir** ou pressione `Ctrl+Enter` / `Cmd+Enter` para enviar.
-5. Aguarde a resposta. O botão entra em estado de carregamento e a caixa de status mostra o andamento.
-6. Revise o diff. Se quiser recomeçar, clique em **Redefinir**.
-
----
-
-## Como selecionar a linguagem
-
-No canto superior da tela há um menu suspenso para escolher a linguagem (por exemplo, Python, JavaScript, C, etc.). Escolha a linguagem do código que você colou para que a IA entenda melhor o contexto.
-
----
-
-## Como escrever um prompt
-
-O prompt é a instrução que você dá para a IA. Escreva de forma clara e direta.
-
-Exemplos bons:
-
-- "Adicione tipos às funções."
-- "Transforme esse loop em uma list comprehension."
-- "Explique o que esse código faz e corrija possíveis erros."
-
-Dicas:
-
-- **Seja específico.** Quanto mais clara a instrução, melhor a resposta.
-- **Comece pequeno.** Teste com pedidos curtos antes de pedir grandes refatorações.
-- **Revise antes de aceitar.** A IA pode sugerir código que parece certo, mas não é.
-
----
-
-## O que significa o diff?
-
-O diff é a comparação entre o seu código original e a sugestão da IA.
-
-- Linhas **verdes** ou marcadas com `+` mostram código que a IA **adicionou**.
-- Linhas **vermelhas** ou marcadas com `-` mostram código que a IA **removeu**.
-- Linhas sem marcação permanecem iguais.
-
-Ler o diff ajuda você a entender exatamente o que mudou.
-
----
-
-## Como aceitar ou rejeitar a sugestão
-
-Depois que a resposta aparecer:
-
-- **Aceitar:** clique no botão **Aplicar** (ou equivalente) para copiar a sugestão para o editor original.
-- **Rejeitar:** clique em **Rejeitar** para descartar a sugestão e continuar com seu código.
-- **Tentar de novo:** edite o prompt e clique em **Construir** novamente.
-
-Não se preocupe em errar: a versão original fica salva até você decidir aplicar.
-
----
-
-## Interface e feedback visual
-
-A interface foi projetada para ser clara, compacta e caber em uma única tela:
-
-- **Cabeçalho** no topo com o nome do app e uma breve descrição.
-- **Barra de controles** horizontal abaixo do cabeçalho, com seleção de linguagem, campo de prompt, botão primário **Construir** e botão secundário **Redefinir**.
-- **Caixa de status** colorida abaixo dos controles:
-  - **Azul**: informação (carregando, instrução inicial).
-  - **Verde**: sucesso na construção.
-  - **Amarela**: aviso, como prompt ou código vazio.
-  - **Vermelha**: erro na API ou no servidor.
-- **Dois editores** empilhados: o código **Original** em cima e a **Diferença** embaixo.
-- **Estado vazio** no editor de diferença explica o que fazer antes da primeira construção.
-
-Durante uma requisição, os botões ficam desabilitados e o botão **Construir** mostra um spinner.
-
----
-
-## Acessibilidade e responsividade
-
-- Todos os campos possuem rótulos semânticos associados via atributo `for`.
-- A caixa de status usa `aria-live`, então leitores de tela anunciam as mensagens automaticamente.
-- Foco visível em todos os controles interativos.
-- A aplicação respeita a preferência `prefers-reduced-motion`.
-- Em uma tela de desktop, os dois editores cabem na primeira tela, um acima do outro, e a rolagem fica dentro de cada editor.
-- Abaixo de cerca de **900 px**, a mesma pilha é usada e a página pode rolar se os dois editores não couberem.
-- Em telas pequenas (até **640 px**), os controles também se empilham e os botões ocupam a largura total.
-
----
-
-## Configuração da API gratuita (free tier)
-
-O projeto já vem configurado para usar o modelo **`kimi-k2.5-lite`**, indicado
-para o plano gratuito da Moonshot e suficiente para pequenos projetos e
-estudantes.
-
-### 1. Criar uma conta e obter a chave
-
-1. Acesse a plataforma da Moonshot / Kimi (https://platform.moonshot.cn/).
-2. Crie uma conta ou faça login.
-3. Gere uma chave de API (*API Key*) na área de configuração da conta.
-
-### 2. Configurar o arquivo `.env`
-
-Copie o exemplo:
-
-```bash
-cp .env.example .env
-```
-
-Edite o arquivo `.env` e cole sua chave:
+No arquivo `.env` do projeto:
 
 ```env
 KIMI_API_KEY=sua_chave_aqui
 KIMI_MODEL=kimi-k2.5-lite
 ```
 
-> **Dica:** mantenha `KIMI_MODEL=kimi-k2.5-lite` para continuar no free tier.
-> Se você tiver créditos pagos, pode trocar por outro modelo, como
-> `kimi-latest`.
+Se a conta tiver créditos pagos, o modelo pode ser trocado, por exemplo para `kimi-latest`. Enquanto estiver no plano gratuito, mantenha `kimi-k2.5-lite`.
 
-### 3. Verificar a cota / limite de requisições
+## O que significam os erros
 
-- O plano gratuito da Moonshot costuma ter um número limitado de requisições
-  por minuto e/ou um total de tokens disponíveis por dia.
-- Você pode acompanhar o consumo e os créditos restantes no painel da sua
-  conta na plataforma Moonshot.
-- Se atingir o limite, a aplicação mostrará a mensagem:
-  **"Cota gratuita esgotada ou limite de requisições atingido. Aguarde alguns
-  minutos ou verifique sua chave e créditos na plataforma Moonshot."**
+A caixa de status em vermelho traduz a resposta da API.
 
----
+### 401 — chave inválida ou ausente
 
-## Mensagens de aviso e o que significam
+Mensagem: "Chave de API inválida ou não configurada. Verifique se a variável KIMI_API_KEY está preenchida corretamente no arquivo .env."
 
-A interface traduz os erros da API em mensagens claras em português:
+A chave não foi colocada no `.env`, não foi lida pelo servidor ou a Moonshot recusou a chave. Corrija `KIMI_API_KEY` e reinicie o servidor. A tela abre mesmo sem chave, mas **Construir** responde 401 até a chave existir.
 
-| Mensagem exibida | O que aconteceu | O que fazer |
-|---|---|---|
-| **Chave de API inválida ou não configurada...** | A `KIMI_API_KEY` está em branco, foi recusada (HTTP 401) ou não foi lida pelo servidor. | Preencha a chave no `.env` e reinicie o servidor. |
-| **Cota gratuita esgotada ou limite de requisições atingido...** | A API retornou erro 429 (*rate limit* / quota excedida). | Aguarde alguns minutos ou verifique seus créditos na plataforma Moonshot. |
-| **O serviço da Moonshot está temporariamente indisponível...** | Erro 5xx no servidor da Moonshot. | Aguarde e tente novamente em instantes. |
-| **Sem conexão com a internet ou serviço indisponível...** | O backend não conseguiu conectar-se à API (problema de rede). | Verifique sua conexão de rede. |
-| **Requisição inválida...** | Erro 400. Pode ser prompt vazio, modelo inexistente ou código muito grande. | Verifique o prompt e o tamanho do código. |
-| **Erro na API (502/503)...** | Erro genérico ou indisponibilidade da API. | Tente novamente mais tarde. |
+### 429 — limite ou cota gratuita
 
----
+Mensagem: "Cota gratuita esgotada ou limite de requisições atingido. Aguarde alguns minutos ou verifique sua chave e créditos na plataforma Moonshot."
 
-## Dicas para estudantes
+O plano gratuito tem um limite de pedidos. Espere um pouco ou confira os créditos em https://platform.moonshot.cn/. Continuar em `kimi-k2.5-lite` ajuda a economizar.
 
-1. **Mantenha os prompts curtos no começo.** Assim você aprende aos poucos o que a IA faz bem.
-2. **Sempre leia o código sugerido.** A IA pode cometer erros ou inventar funções que não existem.
-3. **Use a ferramenta para aprender, não para copiar.** Tente entender por que a sugestão foi feita.
-4. **Não envie dados pessoais ou senhas.** O código vai para a API da Moonshot.
-5. **No plano gratuito, economize chamadas.** Espere ter uma ideia clara do que pedir antes de clicar em **Construir**.
+### Outros erros
 
----
+- **503 — serviço indisponível.** "O serviço da Moonshot está temporariamente indisponível. Aguarde alguns instantes e tente novamente."
+- **503 — sem conexão.** "Sem conexão com a internet ou serviço indisponível. Verifique sua conexão de rede e tente novamente."
+- **400 — requisição inválida.** O prompt, o modelo ou o tamanho do código foi recusado. A mensagem começa com "Requisição inválida".
+- **502 ou outro código.** A caixa mostra "Erro na API" seguido do número. Tente de novo mais tarde.
+- **Aviso amarelo.** O prompt está vazio, ou o editor Original está vazio. Preencha os dois antes de clicar em **Construir**.
 
-## Erros comuns
+## Dicas
 
-### `401` — Chave de API inválida ou ausente
-
-Você esqueceu de configurar a chave no arquivo `.env`, ou a chave está errada.
-
-**Solução:**
-
-1. Abra o arquivo `.env` na raiz do projeto.
-2. Verifique se `KIMI_API_KEY` está preenchida corretamente.
-3. Reinicie o servidor.
-
-### `429` — Limite de requisições ou cota gratuita esgotada
-
-A API retornou um erro de *rate limit* ou a cota gratuita acabou.
-
-**Solução:**
-
-- Aguarde alguns minutos e tente novamente.
-- No painel da Moonshot, verifique seu saldo de tokens e créditos.
-- Se estiver usando `kimi-latest`, considere trocar para `kimi-k2.5-lite`.
-
-### `503` — Serviço da Moonshot indisponível
-
-A API da Moonshot está com instabilidade temporária.
-
-**Solução:**
-
-- Aguarde um pouco e tente novamente.
-- Verifique o status da plataforma Moonshot.
-
-### O modelo retorna código estranho ou em outra linguagem
-
-Verifique se você selecionou a linguagem correta no menu suspenso. Se o problema continuar, tente um prompt mais específico, como "responda em português do Brasil e mantenha a linguagem Python".
-
-### O texto do meu código é muito grande e dá erro
-
-O app limita o tamanho do código enviado (padrão de 32.000 caracteres). Se precisar enviar um arquivo grande, divida-o em partes menores.
-
----
-
-## Variáveis de ambiente
-
-| Variável | Descrição | Padrão |
-|---|---|---|
-| `KIMI_API_KEY` | Chave da API Moonshot/Kimi | — |
-| `KIMI_BASE_URL` | URL base compatível com OpenAI | `https://api.moonshot.cn/v1` |
-| `KIMI_MODEL` | Modelo usado (use `kimi-k2.5-lite` no free tier) | `kimi-k2.5-lite` |
-| `APP_HOST` | Host do servidor | `0.0.0.0` |
-| `APP_PORT` | Porta do servidor | `8000` |
-| `CORS_ORIGINS` | Origens permitidas pelo CORS | `*` |
-| `MAX_CODE_CHARS` | Tamanho máximo do campo `code` | `32000` |
-| `KIMI_REQUEST_TIMEOUT` | Timeout da chamada à API, em segundos | `60` |
-
----
-
-## Execução e testes
-
-Para iniciar o servidor localmente:
-
-```bash
-python3 main.py
-```
-
-Acesse no navegador: `http://localhost:8000`
-
-Para rodar os testes automatizados:
-
-```bash
-python3 -m pytest tests/ -q
-```
-
----
-
-## Precisa de mais ajuda?
-
-- Leia o `README.md` para instruções de instalação e variáveis de ambiente.
-- Consulte a documentação oficial da Moonshot em https://platform.moonshot.cn/.
-- Abra uma issue no repositório do projeto se encontrar um bug.
-
-Bons estudos e boas sugestões de código!
+- Peça uma coisa de cada vez.
+- Leia a Diferença antes de copiar a sugestão. A IA pode errar.
+- Não cole senhas nem dados pessoais. O código é enviado à Moonshot.
+- No plano gratuito, espere ter o pedido claro antes de clicar em **Construir**.

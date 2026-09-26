@@ -32,6 +32,10 @@ def test_static_index_served_at_root(client):
     assert response.status_code == 200
     assert "text/html" in response.headers["content-type"]
     assert "IPEIA VIBE CODING" in response.text
+    assert 'href="/manual"' in response.text
+    assert ">Manual<" in response.text
+    assert "/style.css?v=5" in response.text
+    assert "Passo a passo" not in response.text
     marker = 'class="editor-section diff-section"'
     marker_at = response.text.index(marker)
     tag_start = response.text.rfind("<section", 0, marker_at)
@@ -39,6 +43,23 @@ def test_static_index_served_at_root(client):
     diff_tag = response.text[tag_start:tag_end]
     assert "hidden" not in diff_tag
     assert "diff-hidden" not in response.text
+
+
+def test_manual_page(client):
+    response = client.get("/manual")
+    assert response.status_code == 200
+    assert "text/html" in response.headers["content-type"]
+    text = response.text
+    assert "IPEIA VIBE CODING" in text
+    assert "Passo a passo" in text
+    assert "Construir" in text
+    assert "Diferença" in text
+    assert "kimi-k2.5-lite" in text
+    assert "401" in text
+    assert "429" in text
+    assert ">Voltar<" in text
+    assert 'href="/"' in text
+    assert "originalEditor" not in text
 
 
 def test_static_js_module_served(client):

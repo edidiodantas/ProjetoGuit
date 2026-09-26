@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -108,6 +109,12 @@ async def composer(req: ComposeRequest) -> ComposeResponse:
     except Exception as exc:
         logger.exception("Erro inesperado em /api/composer")
         raise HTTPException(status_code=500, detail="Erro interno do servidor") from exc
+
+
+@app.get("/manual", include_in_schema=False)
+async def manual_page() -> FileResponse:
+    """Manual do estudante. Rota própria para não alongar a página do editor."""
+    return FileResponse(Path(__file__).resolve().parent / "static" / "manual.html")
 
 
 # Mount static files LAST so API routes take precedence. Using html=True serves

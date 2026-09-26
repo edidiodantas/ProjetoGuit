@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="manual-page">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual — IPEIA VIBE CODING</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/style.css?v=5">
+</head>
+<body class="manual-page">
+    <header class="manual-top">
+        <a class="manual-back" href="/">Voltar</a>
+        <p class="manual-top-title">IPEIA VIBE CODING</p>
+    </header>
+
+    <article class="manual">
+        <h1>Manual do IPEIA VIBE CODING</h1>
+        <p class="manual-lead">Este guia mostra como usar o <strong>IPEIA VIBE CODING</strong>, um tutor de código para estudantes. Você escreve um programa, pede uma melhoria em português e compara a sugestão com o que escreveu.</p>
+
+        <h2>O que é esta tela</h2>
+        <p>A tela principal cabe em uma única janela no computador, sem rolagem da página. O visual é claro (tema claro), com a fonte Ubuntu.</p>
+        <p>De cima para baixo:</p>
+        <ul>
+            <li>O nome <strong>IPEIA VIBE CODING</strong> e, ao lado, o botão <strong>Manual</strong>, que abre este guia.</li>
+            <li>A barra de controles: menu <strong>Linguagem</strong>, campo <strong>Prompt</strong>, botão <strong>Construir</strong> e botão <strong>Redefinir</strong>.</li>
+            <li>Uma caixa de status colorida. Azul é informação, verde é sucesso, amarelo é aviso e vermelho é erro.</li>
+            <li>O editor <strong>Original</strong>, onde fica o seu código.</li>
+            <li>O painel <strong>Diferença</strong>, logo abaixo do Original. Ele fica visível o tempo todo. Antes do primeiro <strong>Construir</strong>, mostra a mensagem "Nenhuma sugestão ainda".</li>
+        </ul>
+        <p>A rolagem acontece dentro de cada editor, não na página.</p>
+
+        <h2>Passo a passo</h2>
+        <ol>
+            <li><strong>Escolha a linguagem</strong> no menu (Python, JavaScript, HTML e outras). Use a linguagem do código que você vai colar.</li>
+            <li><strong>Cole ou edite o código</strong> no editor <strong>Original</strong>. Você pode mudar o exemplo que já vem na tela.</li>
+            <li><strong>Escreva o prompt</strong> no campo Prompt. Diga com clareza o que a IA deve fazer. Exemplos: "Adicione tratamento de erros" ou "Explique este código e corrija os erros".</li>
+            <li><strong>Clique em Construir.</strong> Também vale pressionar <kbd>Ctrl+Enter</kbd> (ou <kbd>Cmd+Enter</kbd> no Mac). O botão mostra um indicador de espera enquanto a resposta não chega.</li>
+            <li><strong>Leia a explicação</strong> na caixa de status, embaixo dos botões. Em caso de sucesso ela fica verde e traz a primeira frase da explicação da IA.</li>
+            <li><strong>Compare o Original com a Diferença.</strong> O Original continua em cima, com o código que você enviou. A Diferença fica embaixo e mostra o que mudou: trechos adicionados em verde (ou com <code>+</code>) e trechos removidos em vermelho (ou com <code>-</code>).</li>
+            <li><strong>Clique em Redefinir</strong> quando quiser começar de novo. O prompt é apagado, a linguagem volta para Python, o Original volta ao exemplo inicial e a Diferença mostra outra vez a dica de que ainda não há sugestão.</li>
+        </ol>
+
+        <h2>Modelo gratuito</h2>
+        <p>As sugestões vêm da API Kimi/Moonshot. O modelo configurado para o plano gratuito é <strong>kimi-k2.5-lite</strong>. Ele gasta menos e costuma bastar para exercícios e trechos curtos.</p>
+        <p>No arquivo <code>.env</code> do projeto:</p>
+        <pre><code>KIMI_API_KEY=sua_chave_aqui
+KIMI_MODEL=kimi-k2.5-lite</code></pre>
+        <p>Se a conta tiver créditos pagos, o modelo pode ser trocado, por exemplo para <code>kimi-latest</code>. Enquanto estiver no plano gratuito, mantenha <code>kimi-k2.5-lite</code>.</p>
+
+        <h2>O que significam os erros</h2>
+        <p>A caixa de status em vermelho traduz a resposta da API.</p>
+
+        <h3>401 — chave inválida ou ausente</h3>
+        <p>Mensagem: "Chave de API inválida ou não configurada. Verifique se a variável KIMI_API_KEY está preenchida corretamente no arquivo .env."</p>
+        <p>A chave não foi colocada no <code>.env</code>, não foi lida pelo servidor ou a Moonshot recusou a chave. Corrija <code>KIMI_API_KEY</code> e reinicie o servidor. A tela abre mesmo sem chave, mas <strong>Construir</strong> responde 401 até a chave existir.</p>
+
+        <h3>429 — limite ou cota gratuita</h3>
+        <p>Mensagem: "Cota gratuita esgotada ou limite de requisições atingido. Aguarde alguns minutos ou verifique sua chave e créditos na plataforma Moonshot."</p>
+        <p>O plano gratuito tem um limite de pedidos. Espere um pouco ou confira os créditos em <a href="https://platform.moonshot.cn/">platform.moonshot.cn</a>. Continuar em <code>kimi-k2.5-lite</code> ajuda a economizar.</p>
+
+        <h3>Outros erros</h3>
+        <ul>
+            <li><strong>503 — serviço indisponível.</strong> "O serviço da Moonshot está temporariamente indisponível. Aguarde alguns instantes e tente novamente."</li>
+            <li><strong>503 — sem conexão.</strong> "Sem conexão com a internet ou serviço indisponível. Verifique sua conexão de rede e tente novamente."</li>
+            <li><strong>400 — requisição inválida.</strong> O prompt, o modelo ou o tamanho do código foi recusado. A mensagem começa com "Requisição inválida".</li>
+            <li><strong>502 ou outro código.</strong> A caixa mostra "Erro na API" seguido do número. Tente de novo mais tarde.</li>
+            <li><strong>Aviso amarelo.</strong> O prompt está vazio, ou o editor Original está vazio. Preencha os dois antes de clicar em <strong>Construir</strong>.</li>
+        </ul>
+
+        <h2>Dicas</h2>
+        <ul>
+            <li>Peça uma coisa de cada vez.</li>
+            <li>Leia a Diferença antes de copiar a sugestão. A IA pode errar.</li>
+            <li>Não cole senhas nem dados pessoais. O código é enviado à Moonshot.</li>
+            <li>No plano gratuito, espere ter o pedido claro antes de clicar em <strong>Construir</strong>.</li>
+        </ul>
+
+        <p class="manual-return"><a class="manual-back" href="/">Voltar</a></p>
+    </article>
+</body>
+</html>

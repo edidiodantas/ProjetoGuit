@@ -81,7 +81,7 @@ Acesse http://localhost:8000 no navegador.
 
 Sem a `KIMI_API_KEY`, a interface carrega normalmente, mas o botão **Construir** retornará um erro `401` até que a chave seja configurada. Se a cota gratuita acabar, a interface mostrará uma mensagem sobre limite de requisições atingido (`429`).
 
-Veja o guia passo a passo em [`docs/manual.md`](docs/manual.md).
+Na interface, o botão **Manual** abre o guia em `/manual`. O mesmo texto está em [`docs/manual.md`](docs/manual.md).
 
 ## Testes
 
