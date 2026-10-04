@@ -1,0 +1,6 @@
+*.deb
+*.iso
+*.gguf
+SHA256SUMS
+__pycache__/
+*.pyc

@@ -1,0 +1,118 @@
+KIT DE TESTE DO FURYU
+=====================
+
+Computador de teste
+-------------------
+Este kit é para um PC com:
+
+- processador Intel Core i5 de 3ª geração (cerca de 2,9 GHz);
+- 8 GB de RAM;
+- SSD de 128 GB.
+
+Esse processador tem AVX e não tem AVX2. As versões oficiais do Ollama
+em geral exigem AVX2 e fecham com a mensagem "illegal instruction".
+
+O que se instala é a janela de teste do Furyu: histórico, campo de
+mensagem e botão Enviar. A conversa é offline, em português do Brasil,
+com o modelo Amadeus Verbo na CPU. Não é o editor completo. O restante
+deste repositório é o projeto (especificação em docs/furyu).
+
+
+1. Baixar o Ubuntu e o modelo
+-----------------------------
+Nesta pasta (furyu-instalador), baixe os dois arquivos abaixo. Eles não
+vão no Git porque são grandes.
+
+Ubuntu 24.04.5.1 LTS, desktop, amd64, a partir de:
+
+    https://releases.ubuntu.com/24.04/
+
+Baixe estes dois arquivos:
+
+    ubuntu-24.04.5.1-desktop-amd64.iso
+    SHA256SUMS
+
+Confira a ISO na mesma pasta:
+
+    sha256sum -c SHA256SUMS --ignore-missing
+
+A linha de ubuntu-24.04.5.1-desktop-amd64.iso precisa fechar com OK.
+A soma publicada para essa ISO é:
+
+    4da4a0c9035da8e68a59a838674f403f0a54472c78a83b4fb7f78d03588f85a7
+
+Modelo, só a quantização Q4_K_M (cerca de 380 MB), a partir de:
+
+    https://huggingface.co/mradermacher/Amadeus-Verbo-FI-Qwen2.5-0.5B-PT-BR-Instruct-GGUF
+
+O arquivo é:
+
+    Amadeus-Verbo-FI-Qwen2.5-0.5B-PT-BR-Instruct.Q4_K_M.gguf
+
+Não baixe a versão f16 nem os pesos completos do Hugging Face.
+Licença do modelo: Apache 2.0. A base é o Qwen2.5-0.5B.
+
+Coloque a ISO, o SHA256SUMS e o GGUF na mesma pasta deste texto e do
+instalar-linux.sh. Se a pasta Furyu-teste de um pendrive já preparado
+tiver esses arquivos, use os que já estão lá.
+
+
+2. Instalar o Ubuntu a partir da ISO
+------------------------------------
+O arquivo ubuntu-24.04.5.1-desktop-amd64.iso é o instalador. Copiar a
+ISO para um pendrive não o torna bootável. Não formate o pendrive que
+já guarda o projeto e o modelo.
+
+Em um computador que já tenha sistema:
+
+1. Use um segundo pendrive, vazio, só para a instalação.
+2. Grave nele ubuntu-24.04.5.1-desktop-amd64.iso.
+   No Ubuntu, use o Criador de disco de inicialização.
+   Em outros sistemas, balenaEtcher ou Rufus também servem.
+
+No PC de teste (i5 de 3ª geração, 8 GB de RAM, SSD de 128 GB):
+
+3. Ligue o PC com o pendrive de instalação conectado.
+4. Abra o menu de boot ou a BIOS/UEFI (em geral F2, F10, F12 ou Del
+   logo depois de ligar) e coloque o pendrive em primeiro na ordem de
+   boot. Se ele não aparecer, desative o Secure Boot e tente outra vez.
+5. Arranque pelo Ubuntu e escolha instalar o Ubuntu.
+6. Idioma: Português (Brasil). Teclado: Português (Brasil). Se o teclado
+   for ABNT2, escolha essa variante.
+7. Instalação normal. Pode marcar atualizações e programas de terceiros.
+8. Tipo de instalação: apagar o disco e instalar o Ubuntu no SSD de
+   128 GB. Isso apaga o conteúdo desse SSD.
+9. Crie o usuário, espere a cópia terminar, reinicie e retire o pendrive
+   de instalação quando o instalador pedir.
+
+
+3. Instalar a janela Furyu
+--------------------------
+Já dentro do Ubuntu do PC de teste, abra a pasta furyu-instalador
+(no pendrive preparado ela também está copiada em Furyu-teste) e rode:
+
+    bash instalar-linux.sh
+
+O GGUF precisa estar nessa pasta, ou na pasta pai. O script:
+
+- gera furyu_0.1.0_amd64.deb a partir de packaging/, se o pacote ainda
+  não estiver ao lado do script, e instala esse pacote;
+- copia Amadeus-Verbo-FI-Qwen2.5-0.5B-PT-BR-Instruct.Q4_K_M.gguf
+  para /usr/share/furyu/;
+- compila o llama.cpp nesta máquina com AVX ligado e AVX2 desligado,
+  se o llama-server ainda não existir ou não rodar aqui;
+- deixa o Furyu no menu do Ubuntu.
+
+Quando terminar, abra o menu de aplicativos e clique em Furyu.
+No terminal, o mesmo programa é o comando:
+
+    furyu
+
+A janela tem o histórico, o campo de mensagem e o botão Enviar.
+A resposta sai do modelo na CPU, sem internet. O contexto é 2048
+e a geração usa 4 threads, um valor adequado a este i5 com 8 GB de RAM.
+
+Se o programa avisar que falta o GGUF ou o llama-server, rode de novo,
+a partir desta pasta:
+
+    bash instalar-linux.sh

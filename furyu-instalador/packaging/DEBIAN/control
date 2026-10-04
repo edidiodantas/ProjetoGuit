@@ -1,0 +1,12 @@
+Package: furyu
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: python3, python3-gi, gir1.2-gtk-3.0
+Maintainer: Edidio Dantas <edidiodantas@users.noreply.github.com>
+Homepage: https://github.com/edidiodantas/ProjetoGuit
+Description: conversa de teste em português com o Amadeus Verbo
+ Janela simples do Furyu para conversar offline, em português do Brasil,
+ com o modelo Amadeus Verbo (GGUF Q4_K_M) pela CPU. O modelo é lido em
+ /usr/share/furyu/ ou ao lado do programa. Não é o editor completo.
