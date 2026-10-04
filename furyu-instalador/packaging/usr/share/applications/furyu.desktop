@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Furyu
+GenericName=Teste em português
+Comment=Conversa offline com o Amadeus Verbo. Não é o editor completo.
+Exec=furyu
+Icon=furyu
+Terminal=false
+Categories=Utility;
+StartupNotify=true
+StartupWMClass=furyu
