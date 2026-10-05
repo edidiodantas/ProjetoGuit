@@ -298,16 +298,39 @@ st.html(
         background: linear-gradient(180deg, #0B4F6C 0%, #0a3f56 100%);
         border-right: none;
     }}
-    section[data-testid="stSidebar"] * {{
+    /* Texto claro na sidebar — SEM forçar cor em * (quebra contraste de code/botões) */
+    section[data-testid="stSidebar"] .stMarkdown,
+    section[data-testid="stSidebar"] .stMarkdown p,
+    section[data-testid="stSidebar"] .stMarkdown li,
+    section[data-testid="stSidebar"] .stMarkdown span,
+    section[data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    section[data-testid="stSidebar"] h1,
+    section[data-testid="stSidebar"] h2,
+    section[data-testid="stSidebar"] h3 {{
         color: #F4FAFC !important;
     }}
-    section[data-testid="stSidebar"] .stMarkdown p,
-    section[data-testid="stSidebar"] .stMarkdown li {{
-        color: #D7E8EF !important;
+    /* Code chips legíveis: fundo escuro + texto claro */
+    section[data-testid="stSidebar"] code {{
+        background: rgba(0, 0, 0, 0.35) !important;
+        color: #FFFFFF !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        padding: 0.1rem 0.4rem !important;
+        border-radius: 6px !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stAlert"] {{
-        background: rgba(255,255,255,0.10);
-        border: 1px solid rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.12) !important;
+        border: 1px solid rgba(255,255,255,0.22) !important;
+        color: #F4FAFC !important;
+    }}
+    section[data-testid="stSidebar"] [data-testid="stAlert"] * {{
+        color: #F4FAFC !important;
+    }}
+    /* Botão da sidebar com contraste */
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button {{
+        background: rgba(255,255,255,0.95) !important;
+        color: #0B4F6C !important;
+        border: 1px solid rgba(255,255,255,0.5) !important;
+        font-weight: 600 !important;
     }}
     .brand-wrap {{
         display: flex;
@@ -365,22 +388,51 @@ st.html(
         color: var(--furyu-ink) !important;
         letter-spacing: -0.02em;
     }}
-    div[data-testid="stButton"] > button[kind="primary"] {{
+    /* Botões principais: sempre texto branco em fundo escuro (mesmo desabilitado) */
+    div[data-testid="stButton"] > button[kind="primary"],
+    div[data-testid="stButton"] > button[kind="primary"]:disabled,
+    div[data-testid="stButton"] > button[kind="primary"][disabled],
+    div[data-testid="stButton"] > button[kind="primary"]:hover {{
         background: linear-gradient(135deg, #0B4F6C, #1B7A9E) !important;
         border: none !important;
-        color: white !important;
+        color: #FFFFFF !important;
         font-weight: 600 !important;
+        opacity: 1 !important;
         box-shadow: 0 8px 18px rgba(11, 79, 108, 0.22);
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
     }}
-    div[data-testid="stButton"] > button[kind="primary"]:hover {{
+    div[data-testid="stButton"] > button[kind="primary"]:disabled,
+    div[data-testid="stButton"] > button[kind="primary"][disabled] {{
+        background: #5f8799 !important;
+        color: #FFFFFF !important;
+        opacity: 1 !important;
+        box-shadow: none !important;
+    }}
+    div[data-testid="stButton"] > button[kind="primary"] * {{
+        color: #FFFFFF !important;
+    }}
+    div[data-testid="stButton"] > button[kind="primary"]:hover:not(:disabled) {{
         transform: translateY(-1px);
         box-shadow: 0 10px 22px rgba(11, 79, 108, 0.28);
     }}
     div[data-testid="stButton"] > button[kind="secondary"] {{
         border: 1px solid var(--furyu-line) !important;
         color: var(--furyu-ink) !important;
-        background: rgba(255,255,255,0.72) !important;
+        background: rgba(255,255,255,0.92) !important;
+    }}
+    div[data-testid="stButton"] > button[kind="secondary"] * {{
+        color: var(--furyu-ink) !important;
+    }}
+    /* Inputs da área principal: texto escuro em fundo claro */
+    [data-testid="stTextInput"] input,
+    [data-testid="stTextArea"] textarea {{
+        color: #1A2B33 !important;
+        background: #FFFFFF !important;
+        caret-color: #0B4F6C !important;
+    }}
+    [data-testid="stTextInput"] input::placeholder,
+    [data-testid="stTextArea"] textarea::placeholder {{
+        color: #6a7f8a !important;
+        opacity: 1 !important;
     }}
     [data-testid="stFileUploader"] {{
         background: rgba(255,255,255,0.72);
