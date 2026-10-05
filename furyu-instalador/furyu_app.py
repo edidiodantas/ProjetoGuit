@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
-"""Janela de teste do Furyu.
+"""Janela Furyu.
 
-Conversa offline com o Amadeus Verbo. Não é o editor completo.
+Conversa em português. O modo local usa o Ollama em 127.0.0.1:11434
+com o modelo amadeus-verbo, sem conta e sem telemetria. O modo online
+é opcional e só envia a chave de API quando está selecionado.
+Não é o editor completo.
 """
 
 import json
-import os
-import signal
-import socket
-import subprocess
-import sys
 import threading
 import urllib.error
 import urllib.request
@@ -19,51 +17,27 @@ import gi
 gi.require_version("Gtk", "3.0")
 from gi.repository import GLib, Gtk
 
-GGUF_NAME = "Amadeus-Verbo-FI-Qwen2.5-0.5B-PT-BR-Instruct.Q4_K_M.gguf"
-SYSTEM_PROMPT = (
-    "Você é o Furyu, um assistente de teste. "
-    "Responda sempre em português do Brasil, de forma clara e curta."
+OLLAMA_TAGS_URL = "http://127.0.0.1:11434/api/tags"
+OLLAMA_CHAT_URL = "http://127.0.0.1:11434/api/chat"
+OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions"
+MODEL_NAME = "amadeus-verbo"
+ONLINE_MODEL = "gpt-4o-mini"
+MSG_MODELO_AUSENTE = (
+    "Modelo local não encontrado. Verifique se o Ollama está rodando "
+    "ou mude para o modo Online."
 )
-
-
-def find_gguf():
-    candidates = [
-        os.path.join("/usr/share/furyu", GGUF_NAME),
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), GGUF_NAME),
-        os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), GGUF_NAME),
-    ]
-    seen = set()
-    for path in candidates:
-        if path in seen:
-            continue
-        seen.add(path)
-        if os.path.isfile(path) and os.path.getsize(path) > 1_000_000:
-            return path
-    return None
-
-
-def find_server():
-    candidates = [
-        "/usr/lib/furyu/llama-server",
-        "/usr/local/bin/llama-server",
-    ]
-    for folder in os.environ.get("PATH", "").split(os.pathsep):
-        if folder:
-            candidates.append(os.path.join(folder, "llama-server"))
-    seen = set()
-    for path in candidates:
-        if path in seen:
-            continue
-        seen.add(path)
-        if os.path.isfile(path) and os.access(path, os.X_OK):
-            return path
-    return None
-
-
-def free_port():
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.bind(("127.0.0.1", 0))
-        return sock.getsockname()[1]
+SYSTEM_PROMPT = (
+    "Você é o Furyu. Responda sempre em português do Brasil, "
+    "de forma clara e curta."
+)
+WELCOME = (
+    "Bem-vindo ao Furyu. No modo local, a conversa fica neste computador: "
+    "o Ollama usa o modelo amadeus-verbo, sem conta e sem telemetria. "
+    "No modo online, opcional, a mesma janela envia a mensagem à OpenAI "
+    "somente se você escolher Online e informar a chave. "
+    "Dá para trocar o modo nesta janela, sem reiniciar. "
+    "Esta versão não é o editor completo."
+)
 
 
 def ui(callback):
@@ -74,21 +48,70 @@ def ui(callback):
     GLib.idle_add(wrapper)
 
 
+def ollama_has_model():
+    try:
+        with urllib.request.urlopen(OLLAMA_TAGS_URL, timeout=3) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+    except Exception:
+        return False
+    for item in payload.get("models") or []:
+        for key in ("name", "model"):
+            raw = item.get(key) or ""
+            if raw.split(":", 1)[0] == MODEL_NAME:
+                return True
+    return False
+
+
+def ollama_chat(messages):
+    payload = {
+        "model": MODEL_NAME,
+        "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+        "stream": False,
+        "options": {"temperature": 0.7, "num_predict": 384},
+    }
+    request = urllib.request.Request(
+        OLLAMA_CHAT_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=180) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+    return ((body.get("message") or {}).get("content") or "").strip()
+
+
+def openai_chat(messages, api_key):
+    payload = {
+        "model": ONLINE_MODEL,
+        "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
+        "temperature": 0.7,
+        "max_tokens": 384,
+    }
+    request = urllib.request.Request(
+        OPENAI_CHAT_URL,
+        data=json.dumps(payload).encode("utf-8"),
+        headers={
+            "Content-Type": "application/json",
+            "Authorization": "Bearer " + api_key,
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=60) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+    return (body["choices"][0]["message"]["content"] or "").strip()
+
+
 class FuryuApp:
     def __init__(self):
         self.messages = []
-        self.proc = None
-        self.port = None
-        self.ready = False
         self.busy = False
-        self.model = find_gguf()
-        self.server = find_server()
-        self.log_path = os.path.join(
-            os.path.expanduser("~"), ".cache", "furyu", "llama-server.log"
-        )
+        self.local_ready = False
+
+        GLib.set_prgname("furyu")
+        GLib.set_application_name("Furyu")
 
         self.window = Gtk.Window(title="Furyu")
-        self.window.set_default_size(760, 560)
+        self.window.set_default_size(780, 640)
         self.window.set_border_width(12)
         self.window.connect("destroy", self.on_destroy)
 
@@ -98,15 +121,35 @@ class FuryuApp:
         title = Gtk.Label()
         title.set_markup("<span size='x-large' weight='bold'>Furyu</span>")
         title.set_xalign(0)
-        subtitle = Gtk.Label(
-            label=(
-                "Teste em português com o Amadeus Verbo, na CPU. "
-                "Esta janela não é o editor completo."
-            )
+
+        self.welcome = Gtk.Label(label=WELCOME)
+        self.welcome.set_xalign(0)
+        self.welcome.set_line_wrap(True)
+        self.welcome.set_max_width_chars(72)
+        self.welcome.set_selectable(True)
+
+        mode_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=12)
+        mode_label = Gtk.Label(label="Modo")
+        mode_label.set_xalign(0)
+        self.local_radio = Gtk.RadioButton.new_with_label_from_widget(
+            None, "Local (Ollama)"
         )
-        subtitle.set_xalign(0)
-        subtitle.set_line_wrap(True)
-        subtitle.set_max_width_chars(70)
+        self.online_radio = Gtk.RadioButton.new_with_label_from_widget(
+            self.local_radio, "Online"
+        )
+        self.local_radio.connect("toggled", self.on_mode)
+        self.online_radio.connect("toggled", self.on_mode)
+        mode_row.pack_start(mode_label, False, False, 0)
+        mode_row.pack_start(self.local_radio, False, False, 0)
+        mode_row.pack_start(self.online_radio, False, False, 0)
+
+        key_label = Gtk.Label(label="Chave de API")
+        key_label.set_xalign(0)
+        self.key_entry = Gtk.Entry()
+        self.key_entry.set_visibility(False)
+        self.key_entry.set_placeholder_text("Não é usada no modo local")
+        self.key_entry.set_hexpand(True)
+        self.key_entry.set_sensitive(False)
 
         hist_label = Gtk.Label(label="Histórico")
         hist_label.set_xalign(0)
@@ -124,7 +167,9 @@ class FuryuApp:
         self.history.set_bottom_margin(8)
         scrolled.add(self.history)
         self.buffer = self.history.get_buffer()
-        self.end_mark = self.buffer.create_mark("end", self.buffer.get_end_iter(), False)
+        self.end_mark = self.buffer.create_mark(
+            "end", self.buffer.get_end_iter(), False
+        )
 
         msg_label = Gtk.Label(label="Mensagem")
         msg_label.set_xalign(0)
@@ -139,12 +184,17 @@ class FuryuApp:
         row.pack_start(self.entry, True, True, 0)
         row.pack_start(self.button, False, False, 0)
 
-        self.status = Gtk.Label(label="Abrindo…")
+        self.status = Gtk.Label(label="Verificando o Ollama…")
         self.status.set_xalign(0)
         self.status.set_line_wrap(True)
+        self.status.set_max_width_chars(72)
 
+        root.pack_start(self.build_menu(), False, False, 0)
         root.pack_start(title, False, False, 0)
-        root.pack_start(subtitle, False, False, 0)
+        root.pack_start(self.welcome, False, False, 0)
+        root.pack_start(mode_row, False, False, 0)
+        root.pack_start(key_label, False, False, 0)
+        root.pack_start(self.key_entry, False, False, 0)
         root.pack_start(hist_label, False, False, 0)
         root.pack_start(scrolled, True, True, 0)
         root.pack_start(msg_label, False, False, 0)
@@ -153,6 +203,45 @@ class FuryuApp:
 
         self.window.show_all()
         GLib.idle_add(self.start_loading)
+
+    def build_menu(self):
+        menubar = Gtk.MenuBar()
+
+        arquivo = Gtk.MenuItem(label="Arquivo")
+        menu_arquivo = Gtk.Menu()
+        sair = Gtk.MenuItem(label="Sair")
+        sair.connect("activate", lambda *_args: self.window.destroy())
+        menu_arquivo.append(sair)
+        arquivo.set_submenu(menu_arquivo)
+        menubar.append(arquivo)
+
+        ajuda = Gtk.MenuItem(label="Ajuda")
+        menu_ajuda = Gtk.Menu()
+        sobre = Gtk.MenuItem(label="Sobre")
+        sobre.connect("activate", self.on_about)
+        menu_ajuda.append(sobre)
+        ajuda.set_submenu(menu_ajuda)
+        menubar.append(ajuda)
+
+        return menubar
+
+    def on_about(self, *_args):
+        dialog = Gtk.MessageDialog(
+            parent=self.window,
+            modal=True,
+            message_type=Gtk.MessageType.INFO,
+            buttons=Gtk.ButtonsType.NONE,
+            text="Sobre o Furyu",
+        )
+        dialog.format_secondary_text(
+            "Furyu 0.1.0. Janela de conversa em português do Brasil. "
+            "O modo local usa o Ollama neste computador, sem conta e sem "
+            "telemetria. O modo online é opcional. Esta versão não é o "
+            "editor completo e não traz o agente de código."
+        )
+        dialog.add_button("Fechar", Gtk.ResponseType.CLOSE)
+        dialog.connect("response", lambda d, _r: d.destroy())
+        dialog.present()
 
     def set_status(self, text):
         self.status.set_text(text)
@@ -168,153 +257,112 @@ class FuryuApp:
         self.history.scroll_mark_onscreen(self.end_mark)
 
     def start_loading(self):
-        if not self.model:
-            self.button.set_sensitive(False)
-            self.set_status(
-                "Falta o arquivo "
-                + GGUF_NAME
-                + " em /usr/share/furyu/ ou ao lado do programa."
-            )
-            return False
-        if not self.server:
-            self.button.set_sensitive(False)
-            self.set_status(
-                "Falta o llama-server. Rode bash instalar-linux.sh na pasta do pendrive."
-            )
-            return False
-        self.button.set_sensitive(False)
-        self.set_status("Carregando o modelo na CPU. No i5 de 3ª geração isso pode levar um minuto.")
-        threading.Thread(target=self.boot_server, daemon=True).start()
+        threading.Thread(target=self.refresh_local, daemon=True).start()
         return False
 
-    def boot_server(self):
-        try:
-            self.port = free_port()
-            os.makedirs(os.path.dirname(self.log_path), exist_ok=True)
-            log = open(self.log_path, "wb")
-            cmd = [
-                self.server,
-                "-m",
-                self.model,
-                "-c",
-                "2048",
-                "-t",
-                "4",
-                "-ngl",
-                "0",
-                "-fa",
-                "off",
-                "--fit",
-                "off",
-                "--cache-ram",
-                "256",
-                "--no-warmup",
-                "--reasoning",
-                "off",
-                "--host",
-                "127.0.0.1",
-                "--port",
-                str(self.port),
-            ]
-            self.proc = subprocess.Popen(
-                cmd,
-                stdout=log,
-                stderr=subprocess.STDOUT,
-                start_new_session=True,
+    def refresh_local(self):
+        ready = ollama_has_model()
+        ui(lambda found=ready: self.apply_local_status(found))
+
+    def apply_local_status(self, ready):
+        self.local_ready = ready
+        if self.busy or self.online_radio.get_active():
+            return
+        if ready:
+            self.set_status(
+                "Modo local pronto. Escreva em português e clique em Enviar."
             )
-            if not self.wait_ready(180):
-                detail = self.failure_text()
-                ui(lambda: self.fail_boot(detail))
-                return
-            ui(self.mark_ready)
-        except Exception as exc:
-            ui(lambda: self.fail_boot(str(exc)))
+        else:
+            self.set_status(MSG_MODELO_AUSENTE)
 
-    def wait_ready(self, timeout):
-        import time
-
-        deadline = time.time() + timeout
-        url = "http://127.0.0.1:%d/health" % self.port
-        while time.time() < deadline:
-            if self.proc.poll() is not None:
-                return False
-            try:
-                with urllib.request.urlopen(url, timeout=2) as resp:
-                    if resp.status == 200:
-                        return True
-            except urllib.error.HTTPError as exc:
-                if exc.code == 200:
-                    return True
-            except Exception:
-                pass
-            time.sleep(0.4)
-        return False
-
-    def failure_text(self):
-        code = self.proc.returncode if self.proc else None
-        tail = ""
-        try:
-            with open(self.log_path, "r", encoding="utf-8", errors="replace") as handle:
-                lines = handle.read().splitlines()
-            tail = " ".join(lines[-8:])
-        except OSError:
-            tail = ""
-        if code in (132, -signal.SIGILL) or "Illegal instruction" in tail:
-            return (
-                "O llama-server parou com instrução ilegal. "
-                "Este PC precisa do llama.cpp compilado com AVX, sem AVX2. "
-                "Rode bash instalar-linux.sh de novo."
+    def on_mode(self, button):
+        if not button.get_active():
+            return
+        online = self.online_radio.get_active()
+        self.key_entry.set_sensitive(online)
+        if self.busy:
+            return
+        if online:
+            self.set_status(
+                "Modo online. A chave de API só é usada quando você clicar em Enviar."
             )
-        if tail:
-            return "Não foi possível carregar o modelo. " + tail[-400:]
-        return "Não foi possível carregar o modelo. Veja " + self.log_path
-
-    def fail_boot(self, detail):
-        self.ready = False
-        self.button.set_sensitive(False)
-        self.set_status(detail)
-
-    def mark_ready(self):
-        self.ready = True
-        self.button.set_sensitive(True)
-        self.entry.grab_focus()
-        self.set_status("Modelo pronto. Escreva em português e clique em Enviar.")
+            return
+        self.set_status("Verificando o Ollama…")
+        threading.Thread(target=self.refresh_local, daemon=True).start()
 
     def on_send(self, *_args):
         text = self.entry.get_text().strip()
-        if not text or self.busy or not self.ready:
+        if not text or self.busy:
+            return
+        online = self.online_radio.get_active()
+        api_key = self.key_entry.get_text().strip() if online else ""
+        if online and not api_key:
+            self.set_status("Informe a chave de API para usar o modo online.")
             return
         self.busy = True
         self.button.set_sensitive(False)
         self.entry.set_text("")
         self.append_history("Você", text)
         self.messages.append({"role": "user", "content": text})
-        self.set_status("Gerando a resposta na CPU…")
-        threading.Thread(target=self.ask, args=(list(self.messages),), daemon=True).start()
+        if online:
+            self.set_status("Gerando a resposta no modo online…")
+            threading.Thread(
+                target=self.ask_online,
+                args=(list(self.messages), api_key),
+                daemon=True,
+            ).start()
+        else:
+            self.set_status("Consultando o Ollama…")
+            threading.Thread(
+                target=self.ask_ollama,
+                args=(list(self.messages),),
+                daemon=True,
+            ).start()
 
-    def ask(self, messages):
-        payload = {
-            "messages": [{"role": "system", "content": SYSTEM_PROMPT}] + messages,
-            "temperature": 0.7,
-            "max_tokens": 384,
-            "stream": False,
-        }
-        data = json.dumps(payload).encode("utf-8")
-        request = urllib.request.Request(
-            "http://127.0.0.1:%d/v1/chat/completions" % self.port,
-            data=data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
+    def ask_ollama(self, messages):
+        if not ollama_has_model():
+            ui(self.show_local_missing)
+            return
+        ui(lambda: self.set_status("Gerando a resposta no Ollama…"))
         try:
-            with urllib.request.urlopen(request, timeout=180) as resp:
-                body = json.loads(resp.read().decode("utf-8"))
-            answer = body["choices"][0]["message"]["content"].strip()
-            if not answer:
-                answer = "(O modelo não devolveu texto.)"
-            ui(lambda: self.show_answer(answer))
-        except Exception as exc:
-            ui(lambda: self.show_error(str(exc)))
+            answer = ollama_chat(messages)
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                ui(self.show_local_missing)
+            else:
+                ui(lambda: self.show_error("Não foi possível obter a resposta do Ollama."))
+            return
+        except Exception:
+            ui(self.show_local_missing)
+            return
+        if not answer:
+            answer = "(O modelo não devolveu texto.)"
+        ui(lambda text=answer: self.show_answer(text))
+
+    def ask_online(self, messages, api_key):
+        try:
+            answer = openai_chat(messages, api_key)
+        except urllib.error.HTTPError as exc:
+            if exc.code in (401, 403):
+                detail = "A chave de API foi recusada."
+            else:
+                detail = (
+                    "Não foi possível usar o modo online. "
+                    "Verifique a chave de API e a conexão."
+                )
+            ui(lambda text=detail: self.show_error(text))
+            return
+        except Exception:
+            ui(
+                lambda: self.show_error(
+                    "Não foi possível usar o modo online. "
+                    "Verifique a chave de API e a conexão."
+                )
+            )
+            return
+        if not answer:
+            answer = "(O modelo não devolveu texto.)"
+        ui(lambda text=answer: self.show_answer(text))
 
     def show_answer(self, answer):
         self.messages.append({"role": "assistant", "content": answer})
@@ -322,21 +370,27 @@ class FuryuApp:
         self.busy = False
         self.button.set_sensitive(True)
         self.entry.grab_focus()
-        self.set_status("Escreva outra mensagem e clique em Enviar.")
+        if self.online_radio.get_active():
+            self.set_status("Modo online. Escreva outra mensagem e clique em Enviar.")
+        else:
+            self.set_status("Modo local. Escreva outra mensagem e clique em Enviar.")
+
+    def show_local_missing(self):
+        self.local_ready = False
+        self.busy = False
+        self.button.set_sensitive(True)
+        self.append_history("Furyu", MSG_MODELO_AUSENTE)
+        self.set_status(MSG_MODELO_AUSENTE)
+        self.entry.grab_focus()
 
     def show_error(self, detail):
         self.busy = False
-        self.button.set_sensitive(self.ready)
-        self.append_history("Furyu", "Não consegui responder agora.")
-        self.set_status(detail[:400])
+        self.button.set_sensitive(True)
+        self.append_history("Furyu", detail)
+        self.set_status(detail)
+        self.entry.grab_focus()
 
     def on_destroy(self, *_args):
-        proc = self.proc
-        if proc and proc.poll() is None:
-            try:
-                os.killpg(proc.pid, signal.SIGTERM)
-            except OSError:
-                proc.terminate()
         Gtk.main_quit()
 
 

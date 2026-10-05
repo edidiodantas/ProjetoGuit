@@ -6,7 +6,8 @@ Architecture: amd64
 Depends: python3, python3-gi, gir1.2-gtk-3.0
 Maintainer: Edidio Dantas <edidiodantas@users.noreply.github.com>
 Homepage: https://github.com/edidiodantas/ProjetoGuit
-Description: conversa de teste em português com o Amadeus Verbo
- Janela simples do Furyu para conversar offline, em português do Brasil,
- com o modelo Amadeus Verbo (GGUF Q4_K_M) pela CPU. O modelo é lido em
- /usr/share/furyu/ ou ao lado do programa. Não é o editor completo.
+Description: conversa em português com o Ollama
+ Janela Furyu para conversar em português do Brasil. O modo local usa
+ o modelo amadeus-verbo no Ollama (127.0.0.1:11434), sem conta e sem
+ telemetria. O modo online é opcional e fica desligado até a escolha
+ do usuário. Não é o editor completo.
