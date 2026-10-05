@@ -240,24 +240,43 @@ st.html(
     [data-testid="stIconMaterial"] {{
         font-family: 'Material Symbols Rounded' !important;
     }}
-    /* Remove botão fantasma "r" / limpar / alça de redimensionar do Streamlit */
+    /* Remove chrome do Streamlit que vira letra/ícone fantasma (ex.: "r") */
     [data-testid="stTextInputClearButton"],
-    [data-testid="stTextArea"] button,
-    textarea {{
-        resize: none !important;
-    }}
-    [data-testid="stTextInputClearButton"] {{
+    [data-testid="stHeaderActionElements"],
+    [data-testid="stElementToolbar"],
+    [data-testid="stElementToolbarButton"],
+    [data-testid="stElementToolbarButtonContainer"],
+    [data-testid="stToolbar"],
+    [data-testid="stDecoration"],
+    [data-testid="stStatusWidget"],
+    [data-testid="stBaseButton-header"],
+    [data-testid="stBaseButton-headerNoPadding"],
+    .stDeployButton,
+    [class*="stDeployButton"],
+    header[data-testid="stHeader"] {{
         display: none !important;
         width: 0 !important;
         height: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        overflow: hidden !important;
         opacity: 0 !important;
         pointer-events: none !important;
     }}
-    header[data-testid="stHeader"] {{
-        display: none !important;
+    textarea {{
+        resize: none !important;
+    }}
+    .app-section-title {{
+        font-family: 'Ubuntu', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 1.45rem;
+        color: var(--furyu-ink);
+        margin: 1rem 0 0.35rem 0;
+        letter-spacing: -0.02em;
+    }}
+    /* Botão Perguntar bem visível (não parece caixinha) */
+    div[data-testid="stForm"] [data-testid="stBaseButton-primary"],
+    div[data-testid="stButton"] > button[kind="primary"] {{
+        min-width: 160px !important;
+        min-height: 42px !important;
+        font-size: 1.05rem !important;
     }}
     .stApp {{
         margin-top: 0 !important;
@@ -418,7 +437,7 @@ with st.sidebar:
         st.rerun()
 
 # --- Enviar PDFs ---
-st.subheader("1. Enviar PDFs")
+st.html('<div class="app-section-title">1. Enviar PDFs</div>')
 uploaded = st.file_uploader(
     "Selecione um ou mais PDFs",
     type=["pdf"],
@@ -458,7 +477,7 @@ else:
     st.info("Nenhum PDF indexado ainda.")
 
 # --- Busca acadêmica (acesso aberto) ---
-st.subheader("2. Buscar artigos (acesso aberto)")
+st.html('<div class="app-section-title">2. Buscar artigos (acesso aberto)</div>')
 st.caption(
     "Não há login. A busca começa no **Oasisbr (IBICT)**, que reúne SciELO, "
     "repositórios e periódicos brasileiros. Se o Oasisbr falhar, usa Semantic Scholar/Crossref. "
@@ -552,22 +571,20 @@ elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
 
 # --- Pergunta ---
-st.subheader("3. Pergunta")
+# Título via HTML próprio (sem link/ícone do Streamlit, que às vezes vira "r" fantasma)
+st.html('<div class="app-section-title">3. Pergunta</div>')
 st.caption("Exemplo: Quais são as principais conclusões do artigo?")
-with st.form("form_pergunta", clear_on_submit=False, border=False):
-    question = st.text_input(
-        "Digite sua pergunta sobre os documentos",
-        placeholder="Escreva sua pergunta aqui…",
-        key="pergunta_texto",
-    )
-    ask_clicked = st.form_submit_button(
-        "Perguntar",
-        type="primary",
-        disabled=not st.session_state.indexed_files or not ollama_ok,
-    )
-if ask_clicked and not question.strip():
-    st.warning("Digite uma pergunta antes de clicar em Perguntar.")
-    ask_clicked = False
+question = st.text_input(
+    "Digite sua pergunta sobre os documentos",
+    placeholder="Escreva sua pergunta aqui…",
+    key="pergunta_texto",
+)
+ask_clicked = st.button(
+    "Perguntar",
+    type="primary",
+    use_container_width=False,
+    disabled=not st.session_state.indexed_files or not question.strip() or not ollama_ok,
+)
 
 if ask_clicked:
     with st.status(
