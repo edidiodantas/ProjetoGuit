@@ -87,12 +87,11 @@ Paywall / Elsevier fechado: o programa NÃO baixa.
 3. PERGUNTA
 -----------
 Caixa de texto: escreva em português.
-Exemplo: Quais são as principais conclusões do artigo?
+Exemplo (texto acima da caixa): Quais são as principais conclusões do artigo?
 
 BOTÃO "Perguntar"
-  Fica cinza (desligado) se:
+  Fica desligado se:
     - não há PDF indexado, ou
-    - a caixa está vazia, ou
     - o Ollama não está ok
 
   Ao clicar (não feche a aba):
@@ -101,6 +100,10 @@ BOTÃO "Perguntar"
     3. Monta a resposta final com citações
 
   Pode levar 1 a 3 minutos (ou mais na 1ª vez).
+
+Nota: se aparecer uma letrinha "r" sozinha numa caixinha ao lado
+do campo, NÃO é "resposta". É um botão fantasma do Streamlit
+(ícone de limpar/redimensionar). Na versão Furyu2 ele fica oculto.
 
 
 4. RESPOSTA

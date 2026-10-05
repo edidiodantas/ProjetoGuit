@@ -231,12 +231,30 @@ st.html(
         --furyu-line: #C9D9E1;
         --furyu-text: #1A2B33;
     }}
-    html, body, [class*="css"] {{
+    /* Fonte Ubuntu só no texto — NÃO em [class*="css"] (quebra ícones do Streamlit). */
+    html, body, .stApp, .stMarkdown, [data-testid="stWidgetLabel"],
+    [data-testid="stMarkdownContainer"], [data-testid="stCaptionContainer"] {{
         font-family: 'Ubuntu', sans-serif;
         color: var(--furyu-text);
     }}
     [data-testid="stIconMaterial"] {{
         font-family: 'Material Symbols Rounded' !important;
+    }}
+    /* Remove botão fantasma "r" / limpar / alça de redimensionar do Streamlit */
+    [data-testid="stTextInputClearButton"],
+    [data-testid="stTextArea"] button,
+    textarea {{
+        resize: none !important;
+    }}
+    [data-testid="stTextInputClearButton"] {{
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
     }}
     header[data-testid="stHeader"] {{
         display: none !important;
@@ -535,16 +553,21 @@ elif search_clicked and search_q.strip():
 
 # --- Pergunta ---
 st.subheader("3. Pergunta")
-question = st.text_input(
-    "Digite sua pergunta sobre os documentos",
-    placeholder="Ex.: Quais são as principais conclusões do artigo?",
-)
-
-ask_clicked = st.button(
-    "Perguntar",
-    type="primary",
-    disabled=not st.session_state.indexed_files or not question.strip() or not ollama_ok,
-)
+st.caption("Exemplo: Quais são as principais conclusões do artigo?")
+with st.form("form_pergunta", clear_on_submit=False, border=False):
+    question = st.text_input(
+        "Digite sua pergunta sobre os documentos",
+        placeholder="Escreva sua pergunta aqui…",
+        key="pergunta_texto",
+    )
+    ask_clicked = st.form_submit_button(
+        "Perguntar",
+        type="primary",
+        disabled=not st.session_state.indexed_files or not ollama_ok,
+    )
+if ask_clicked and not question.strip():
+    st.warning("Digite uma pergunta antes de clicar em Perguntar.")
+    ask_clicked = False
 
 if ask_clicked:
     with st.status(
