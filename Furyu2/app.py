@@ -379,16 +379,18 @@ st.html(
         display: block;
         object-fit: contain;
         transform-origin: 50% 80%;
+        /* leve inclinação para revelar um pouco mais as páginas coloridas */
         filter: drop-shadow(0 8px 16px rgba(11, 79, 108, 0.2));
         animation: furyu-mark-float 4.8s ease-in-out infinite;
     }}
     @keyframes furyu-mark-float {{
-        0%, 100% {{ transform: translateY(0) rotate(0deg); }}
-        50% {{ transform: translateY(-5px) rotate(-1.5deg); }}
+        0%, 100% {{ transform: rotate(-7deg) translateY(0); }}
+        50% {{ transform: rotate(-9deg) translateY(-4px); }}
     }}
     @media (prefers-reduced-motion: reduce) {{
         .brand-wrap .furyu-mark {{
             animation: none !important;
+            transform: rotate(-7deg) !important;
         }}
     }}
     .brand-text {{
