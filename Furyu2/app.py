@@ -310,12 +310,19 @@ st.html(
         color: #F4FAFC !important;
     }}
     /* Code chips legíveis: fundo escuro + texto claro */
-    section[data-testid="stSidebar"] code {{
-        background: rgba(0, 0, 0, 0.35) !important;
+    section[data-testid="stSidebar"] code,
+    section[data-testid="stSidebar"] code *,
+    section[data-testid="stSidebar"] .stMarkdown code,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] code {{
+        background: rgba(0, 0, 0, 0.45) !important;
         color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.25) !important;
-        padding: 0.1rem 0.4rem !important;
+        border: 1px solid rgba(255, 255, 255, 0.28) !important;
+        padding: 0.15rem 0.45rem !important;
         border-radius: 6px !important;
+        font-weight: 600 !important;
+    }}
+    section[data-testid="stSidebar"] strong {{
+        color: #FFFFFF !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stAlert"] {{
         background: rgba(255,255,255,0.12) !important;
@@ -431,8 +438,17 @@ st.html(
     }}
     [data-testid="stTextInput"] input::placeholder,
     [data-testid="stTextArea"] textarea::placeholder {{
-        color: #6a7f8a !important;
+        color: #4a6570 !important;
         opacity: 1 !important;
+    }}
+    /* Texto digitado sempre escuro (evita branco-sobre-branco) */
+    [data-testid="stTextInput"] input,
+    [data-testid="stTextInput"] input:focus,
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stTextArea"] textarea:focus {{
+        color: #102832 !important;
+        -webkit-text-fill-color: #102832 !important;
+        background: #FFFFFF !important;
     }}
     [data-testid="stFileUploader"] {{
         background: rgba(255,255,255,0.72);
