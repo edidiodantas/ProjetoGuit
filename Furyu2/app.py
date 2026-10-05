@@ -225,26 +225,30 @@ st.html(
         --furyu-line: #C9D9E1;
         --furyu-text: #1A2B33;
     }}
-    /* Fonte Ubuntu só no texto — NÃO em botões/ícones (quebra o rótulo e vira "r"). */
+    /* Fonte Ubuntu em toda a UI — ícones Material ficam de fora. */
+    html, body, .stApp, .stMarkdown,
+    [data-testid="stWidgetLabel"],
+    [data-testid="stCaptionContainer"],
+    [data-testid="stMarkdownContainer"],
+    [data-testid="stAlert"],
+    .meta-chip, .cfg-chip, .app-title, .app-tagline, .app-section-title,
+    input, textarea, label, p, span, li, h1, h2, h3, h4,
+    button, button p, button span, button div {{
+        font-family: 'Ubuntu', sans-serif !important;
+    }}
     html, body, .stApp, .stMarkdown, [data-testid="stWidgetLabel"],
     [data-testid="stCaptionContainer"] {{
-        font-family: 'Ubuntu', sans-serif;
         color: var(--furyu-text);
     }}
     /* Markdown fora de botões: texto escuro. NÃO aplicar dentro de button. */
-    [data-testid="stMarkdownContainer"] {{
-        font-family: 'Ubuntu', sans-serif;
-    }}
     div[data-testid="stMarkdownContainer"]:not(button *),
     [data-testid="stMain"] [data-testid="stMarkdownContainer"] {{
         color: var(--furyu-text);
     }}
-    [data-testid="stIconMaterial"] {{
+    /* Ícones do Streamlit precisam da fonte Material (não Ubuntu). */
+    [data-testid="stIconMaterial"],
+    [data-testid="stIconMaterial"] * {{
         font-family: 'Material Symbols Rounded' !important;
-    }}
-    /* Nunca aplicar fonte de ícone no texto dos botões */
-    button, button * {{
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
     }}
     /* Remove chrome do Streamlit que vira letra/ícone fantasma (ex.: "r") */
     [data-testid="stTextInputClearButton"],
@@ -494,7 +498,7 @@ st.html(
         justify-content: center !important;
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+        font-family: 'Ubuntu', sans-serif !important;
         font-size: 1.15rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.02em !important;
