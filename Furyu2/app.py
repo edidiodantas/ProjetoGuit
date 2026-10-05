@@ -231,14 +231,26 @@ st.html(
         --furyu-line: #C9D9E1;
         --furyu-text: #1A2B33;
     }}
-    /* Fonte Ubuntu só no texto — NÃO em [class*="css"] (quebra ícones do Streamlit). */
+    /* Fonte Ubuntu só no texto — NÃO em botões/ícones (quebra o rótulo e vira "r"). */
     html, body, .stApp, .stMarkdown, [data-testid="stWidgetLabel"],
-    [data-testid="stMarkdownContainer"], [data-testid="stCaptionContainer"] {{
+    [data-testid="stCaptionContainer"] {{
         font-family: 'Ubuntu', sans-serif;
+        color: var(--furyu-text);
+    }}
+    /* Markdown fora de botões: texto escuro. NÃO aplicar dentro de button. */
+    [data-testid="stMarkdownContainer"] {{
+        font-family: 'Ubuntu', sans-serif;
+    }}
+    div[data-testid="stMarkdownContainer"]:not(button *),
+    [data-testid="stMain"] [data-testid="stMarkdownContainer"] {{
         color: var(--furyu-text);
     }}
     [data-testid="stIconMaterial"] {{
         font-family: 'Material Symbols Rounded' !important;
+    }}
+    /* Nunca aplicar fonte de ícone no texto dos botões */
+    button, button * {{
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
     }}
     /* Remove chrome do Streamlit que vira letra/ícone fantasma (ex.: "r") */
     [data-testid="stTextInputClearButton"],
@@ -271,12 +283,12 @@ st.html(
         margin: 1rem 0 0.35rem 0;
         letter-spacing: -0.02em;
     }}
-    /* Botão Perguntar bem visível (não parece caixinha) */
+    /* Botão Perguntar: tamanho mínimo */
     div[data-testid="stForm"] [data-testid="stBaseButton-primary"],
-    div[data-testid="stButton"] > button[kind="primary"] {{
-        min-width: 160px !important;
-        min-height: 42px !important;
-        font-size: 1.05rem !important;
+    div[data-testid="stButton"] > button[kind="primary"],
+    button[data-testid="stBaseButton-primary"] {{
+        min-width: 200px !important;
+        min-height: 48px !important;
     }}
     .stApp {{
         margin-top: 0 !important;
@@ -412,7 +424,11 @@ st.html(
         color: var(--furyu-ink) !important;
         letter-spacing: -0.02em;
     }}
-    /* Botão Perguntar (e demais primary): fundo escuro sólido + texto branco legível */
+    /*
+     * Botão Perguntar: o rótulo interno do Streamlit às vezes vira só um "r"
+     * (fonte/ícone quebrado). Escondemos o texto interno e desenhamos
+     * "Perguntar" de novo com ::after — fonte do sistema, sempre legível.
+     */
     div[data-testid="stButton"] > button[kind="primary"],
     div[data-testid="stButton"] > button[kind="primary"]:disabled,
     div[data-testid="stButton"] > button[kind="primary"][disabled],
@@ -422,38 +438,66 @@ st.html(
     button[data-testid="stBaseButton-primary"][disabled],
     button[data-testid="stBaseButton-primary"]:hover,
     div[data-testid="stForm"] [data-testid="stBaseButton-primary"] {{
+        position: relative !important;
         background-color: #0B4F6C !important;
         background-image: none !important;
-        border: 1px solid #0B4F6C !important;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        font-weight: 700 !important;
+        border: 2px solid #0B4F6C !important;
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
         opacity: 1 !important;
+        overflow: visible !important;
         box-shadow: 0 8px 18px rgba(11, 79, 108, 0.22);
+        min-width: 200px !important;
+        min-height: 48px !important;
+        padding: 0.75rem 1.5rem !important;
     }}
     div[data-testid="stButton"] > button[kind="primary"]:disabled,
     div[data-testid="stButton"] > button[kind="primary"][disabled],
     button[data-testid="stBaseButton-primary"]:disabled,
     button[data-testid="stBaseButton-primary"][disabled] {{
         background-color: #3d6d82 !important;
-        background-image: none !important;
         border-color: #3d6d82 !important;
-        color: #FFFFFF !important;
-        -webkit-text-fill-color: #FFFFFF !important;
-        opacity: 1 !important;
         box-shadow: none !important;
     }}
+    /* Esconde o rótulo quebrado do Streamlit (inclui o "r" fantasma) */
     div[data-testid="stButton"] > button[kind="primary"] *,
-    button[data-testid="stBaseButton-primary"] *,
-    button[data-testid="stBaseButton-primary"] p,
-    button[data-testid="stBaseButton-primary"] span,
-    button[data-testid="stBaseButton-primary"] div {{
+    button[data-testid="stBaseButton-primary"] * {{
+        color: transparent !important;
+        -webkit-text-fill-color: transparent !important;
+        font-size: 0 !important;
+        line-height: 0 !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }}
+    /* Texto real e estável */
+    div[data-testid="stButton"] > button[kind="primary"]::after,
+    button[data-testid="stBaseButton-primary"]::after {{
+        content: "Perguntar" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         color: #FFFFFF !important;
         -webkit-text-fill-color: #FFFFFF !important;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.02em !important;
+        line-height: 1.2 !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: none !important;
+        text-shadow: none !important;
+        -webkit-background-clip: border-box !important;
+        background-clip: border-box !important;
     }}
     div[data-testid="stButton"] > button[kind="primary"]:hover:not(:disabled),
     button[data-testid="stBaseButton-primary"]:hover:not(:disabled) {{
         background-color: #1B7A9E !important;
+        border-color: #1B7A9E !important;
         transform: translateY(-1px);
         box-shadow: 0 10px 22px rgba(11, 79, 108, 0.28);
     }}
@@ -707,6 +751,7 @@ ask_clicked = st.button(
     "Perguntar",
     type="primary",
     use_container_width=False,
+    key="btn_perguntar",
     disabled=not st.session_state.indexed_files or not question.strip() or not ollama_ok,
 )
 
