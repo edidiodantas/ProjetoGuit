@@ -13,6 +13,7 @@ Importante:
 from __future__ import annotations
 
 import asyncio
+import base64
 import json
 import os
 import re
@@ -202,21 +203,14 @@ ollama_ok, ollama_msg = ollama_status()
 # ---------------------------------------------------------------------------
 # Customização visual (mesma identidade no Windows e no Ubuntu)
 # ---------------------------------------------------------------------------
-MARK_SVG = """
-<svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-  <defs>
-    <linearGradient id="furyuInk" x1="12" y1="8" x2="76" y2="80" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0B4F6C"/>
-      <stop offset="1" stop-color="#1B7A9E"/>
-    </linearGradient>
-  </defs>
-  <rect x="6" y="10" width="52" height="68" rx="6" stroke="url(#furyuInk)" stroke-width="3.2"/>
-  <path d="M58 18h16c4 0 8 4 8 8v44c0 4-4 8-8 8H58" stroke="url(#furyuInk)" stroke-width="3.2" stroke-linejoin="round"/>
-  <path d="M20 28h28M20 40h28M20 52h18" stroke="#0B4F6C" stroke-width="2.6" stroke-linecap="round" opacity="0.85"/>
-  <circle cx="68" cy="48" r="10" fill="#E8F4F8" stroke="#0B4F6C" stroke-width="2.4"/>
-  <path d="M64 48h8M68 44v8" stroke="#0B4F6C" stroke-width="2.2" stroke-linecap="round"/>
-</svg>
-"""
+# Logo: livro aberto com páginas coloridas (PNG — st.html/DOMPurify remove <svg> cru)
+_MARK_PNG_B64 = base64.b64encode(
+    (ROOT / "assets" / "furyu-mark.png").read_bytes()
+).decode("ascii")
+MARK_IMG = (
+    f'<img class="furyu-mark" src="data:image/png;base64,{_MARK_PNG_B64}" '
+    f'width="88" height="88" alt="Furyu — livro aberto com páginas coloridas" />'
+)
 
 _UBUNTU_CSS = (ROOT / "assets" / "fonts.css").read_text(encoding="utf-8")
 st.html(
@@ -371,14 +365,27 @@ st.html(
     .brand-wrap {{
         display: flex;
         align-items: center;
-        gap: 1rem;
+        gap: 1.1rem;
         margin: 0.2rem 0 0.35rem 0;
     }}
-    .brand-wrap svg {{
+    .brand-wrap .furyu-mark {{
         flex-shrink: 0;
-        width: 78px;
-        height: 78px;
-        filter: drop-shadow(0 8px 18px rgba(11, 79, 108, 0.18));
+        width: 88px;
+        height: 88px;
+        display: block;
+        object-fit: contain;
+        transform-origin: 50% 80%;
+        filter: drop-shadow(0 8px 16px rgba(11, 79, 108, 0.2));
+        animation: furyu-mark-float 4.8s ease-in-out infinite;
+    }}
+    @keyframes furyu-mark-float {{
+        0%, 100% {{ transform: translateY(0) rotate(0deg); }}
+        50% {{ transform: translateY(-5px) rotate(-1.5deg); }}
+    }}
+    @media (prefers-reduced-motion: reduce) {{
+        .brand-wrap .furyu-mark {{
+            animation: none !important;
+        }}
     }}
     .brand-text {{
         display: flex;
@@ -393,6 +400,11 @@ st.html(
         color: var(--furyu-ink);
         margin: 0;
         line-height: 0.95;
+        animation: furyu-title-in 0.7s ease-out both;
+    }}
+    @keyframes furyu-title-in {{
+        from {{ opacity: 0; transform: translateX(-8px); }}
+        to {{ opacity: 1; transform: translateX(0); }}
     }}
     .app-tagline {{
         font-family: 'Ubuntu', sans-serif !important;
@@ -544,7 +556,7 @@ st.html(
     }}
     </style>
     <div class="brand-wrap">
-      {MARK_SVG}
+      {MARK_IMG}
       <div class="brand-text">
         <div class="app-title">Furyu</div>
         <p class="app-tagline">Pesquisa e leitura de artigos científicos no seu computador.</p>
