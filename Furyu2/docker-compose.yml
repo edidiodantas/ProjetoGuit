@@ -1,0 +1,43 @@
+# MVP para notebook Windows (Docker Desktop) — CPU, sem NVIDIA.
+# GPU é opcional: docker compose -f docker-compose.yml -f docker-compose.gpu.yml up
+name: paperqa-mvp
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 10s
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    ports:
+      - "8501:8501"
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen3.5:4b}
+      EMBEDDING_MODEL: st-multi-qa-MiniLM-L6-cos-v1
+      PDF_DIR: /app/documentos
+      PQA_HOME: /app/.pqa
+    volumes:
+      - pdfs:/app/documentos
+      - pqa_index:/app/.pqa
+      - hf_cache:/app/.cache/hf
+
+volumes:
+  ollama_models:
+  pdfs:
+  pqa_index:
+  hf_cache:

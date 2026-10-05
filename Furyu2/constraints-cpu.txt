@@ -1,0 +1,2 @@
+# Impede o pip de puxar PyTorch CUDA (~1 GB+) no build do Docker.
+torch==2.14.0+cpu

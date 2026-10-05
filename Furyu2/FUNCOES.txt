@@ -1,0 +1,147 @@
+FURYU
+=====
+Interface gráfica do programa (Streamlit).
+É a mesma tela em Windows e no Linux (Ubuntu LTS / Deepin).
+
+Sim: a tela ao lado é esta.
+Título:  Furyu
+         Pesquisa e leitura de artigos científicos no seu computador.
+Idioma:  textos nossos em português do Brasil.
+         Dois botões do Streamlit podem ficar em inglês
+         ("Browse files" / menu). Não mudam o uso.
+
+
+O QUE O PROGRAMA FAZ
+--------------------
+Você envia PDFs (ou busca artigos abertos), pergunta em português,
+e a IA local responde COM BASE NOS ARQUIVOS, com citações.
+Não usa OpenAI. A leitura do PDF é no PC.
+
+
+BARRA SUPERIOR (status)
+-----------------------
+Faixas com modelo, embeddings e endereço do Ollama.
+
+Faixa verde:  Ollama ok e o modelo do .env está instalado.
+Faixa vermelha: Ollama desligado ou modelo errado.
+  -> abra o Ollama e rode:  ollama pull qwen3.5:4b
+
+
+BARRA LATERAL ESQUERDA — Configuração
+-------------------------------------
+Só informação (não é formulário).
+
+- LLM / resumo / agente / enriquecimento
+    Os 4 papéis de IA, todos no Ollama local.
+- Embeddings
+    Busca de trechos no PDF (modelo pequeno, local).
+- PDFs
+    Pasta onde os arquivos enviados são gravados.
+- PQA_HOME
+    Pasta do índice interno.
+
+Aviso amarelo: a 1ª resposta pode demorar. Não feche a aba.
+
+BOTÃO "Limpar sessão"
+  Apaga da memória os PDFs já indexados e a última resposta.
+  Os arquivos na pasta documentos/ continuam no disco.
+  Use para começar de novo.
+
+
+1. ENVIAR PDFS
+--------------
+Botão de envio (pode aparecer "Browse files" em inglês).
+Aceita um ou vários PDF.
+
+O que acontece ao enviar:
+  1. Salva o arquivo na pasta documentos
+  2. Extrai o texto
+  3. Gera embeddings locais
+  4. Pede metadados ao Ollama (lento)
+
+Mensagens:
+  "Já indexado: nome.pdf"     — não processa de novo nesta sessão
+  "Indexado: nome.pdf"        — pronto para perguntar
+  "Falha: ..."                — erro (PDF danificado, Ollama, etc.)
+  "Documentos na sessão: ..." — lista do que vale para as perguntas
+  "Nenhum PDF indexado ainda."
+
+
+2. BUSCAR ARTIGOS (ACESSO ABERTO)
+---------------------------------
+Usa o Oasisbr (IBICT) — API pública, sem chave, sem login.
+Reúne SciELO, repositórios e periódicos brasileiros.
+Se o Oasisbr falhar, tenta Semantic Scholar e Crossref.
+Unpaywall só entra para achar PDF livre (pelo DOI).
+Não precisa de conta de usuário — só CONTACT_EMAIL no .env.
+
+Caixa "Tema ou título" + botão Buscar.
+Lista os artigos; o botão de baixar só liga se houver PDF aberto.
+Botão "Baixar PDF aberto e indexar":
+  baixa o PDF legal e manda para o mesmo índice da seção 1.
+Se não houver PDF aberto: baixe no SciELO e use Enviar PDFs.
+
+Paywall / Elsevier fechado: o programa NÃO baixa.
+
+
+3. PERGUNTA
+-----------
+Caixa de texto: escreva em português.
+Exemplo: Quais são as principais conclusões do artigo?
+
+BOTÃO "Perguntar"
+  Fica cinza (desligado) se:
+    - não há PDF indexado, ou
+    - a caixa está vazia, ou
+    - o Ollama não está ok
+
+  Ao clicar (não feche a aba):
+    1. Busca trechos relevantes nos PDFs
+    2. Resume cada trecho (summary)
+    3. Monta a resposta final com citações
+
+  Pode levar 1 a 3 minutos (ou mais na 1ª vez).
+
+
+4. RESPOSTA
+-----------
+Só aparece depois de uma pergunta com sucesso.
+
+Texto principal: resposta da IA, em geral com citações.
+
+BOTÃO/ÁREA "Mostrar fontes"
+  Abre os trechos usados (Fonte 1, Fonte 2, ...).
+  "relevância" = quão útil aquele trecho foi.
+  Se não houver lista, pode mostrar só as referências
+  ou "Nenhuma fonte estruturada retornada."
+
+
+O QUE ESTE PROGRAMA NÃO FAZ
+---------------------------
+- Não traduz PDF sozinho (pergunta em PT sobre texto em PT ou EN).
+- Não edita o PDF.
+- Não baixa artigo de paywall (só PDF em acesso aberto).
+- Não grava histórico de perguntas depois de "Limpar sessão"
+  ou de fechar o navegador.
+- Não usa chave OpenAI.
+
+
+ORDEM DE USO (resumo)
+---------------------
+1. Ollama aberto  (localhost:11434)
+2. bash rodar-ubuntu.sh   (ou rodar-windows.bat)
+3. Abrir http://localhost:8501
+4. Enviar PDF **ou** Buscar artigo aberto e indexar
+5. Perguntar   -> esperar resposta
+6. Abrir "Mostrar fontes" se quiser conferir
+7. Limpar sessão para outro conjunto de PDFs
+
+
+TROCAR O MODELO
+---------------
+Não é botão na tela. Edite o arquivo .env:
+
+  OLLAMA_MODEL=qwen3.5:4b
+
+Depois: ollama pull qwen3.5:4b
+e reinicie o Streamlit.

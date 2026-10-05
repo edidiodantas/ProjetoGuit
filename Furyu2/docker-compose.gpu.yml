@@ -1,0 +1,11 @@
+# Opcional. Só se o PC tiver NVIDIA + Docker com GPU (Linux ou WSL2).
+# Na apresentação Windows da empresa, use só docker-compose.yml (CPU).
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

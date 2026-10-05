@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+venv
+.env
+linux-env
+linux-env.img
+documentos
+.pqa
+__pycache__
+*.pyc
+*.md
+scripts
+INSTALAR-DEEPIN.md

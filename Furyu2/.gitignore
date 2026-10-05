@@ -1,0 +1,9 @@
+.venv/
+.pqa/
+__pycache__/
+*.pyc
+.env
+documentos/*.pdf
+linux-env/
+linux-env.img
+.streamlit/secrets.toml

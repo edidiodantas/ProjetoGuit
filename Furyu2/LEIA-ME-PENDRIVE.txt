@@ -1,0 +1,32 @@
+FURYU2 — LEIA-ME (português do Brasil)
+======================================
+
+Esta pasta é a versão Furyu (antes AcervoQA / paperqa-gui-local).
+O nome Furyu2 evita conflito com a pasta Furyu que você já tem.
+
+COMO USAR ESTE PENDRIVE
+-----------------------
+1. NÃO rode o programa de dentro do pendrive (exFAT quebra o .venv).
+2. Copie a pasta Furyu2 INTEIRA para o disco do PC:
+     Ubuntu:  ~/Furyu2
+     Windows: C:\Furyu2
+3. Siga o guia:
+     Ubuntu LTS → abra INSTALAR-UBUNTU.md
+                  ou rode: bash install-ubuntu.sh
+     Windows 11 → abra INSTALAR-WINDOWS.md
+                  ou rode: install-windows.bat
+4. Instale o Ollama e baixe o modelo:
+     ollama pull qwen3.5:4b
+5. Abra a interface:
+     Ubuntu:  bash rodar-ubuntu.sh
+     Windows: rodar-windows.bat
+6. No navegador: http://localhost:8501
+   O título da tela deve ser Furyu.
+
+Arquivos importantes:
+  README.md
+  INSTALAR-UBUNTU.md
+  INSTALAR-WINDOWS.md
+  FUNCOES.txt
+  install-ubuntu.sh / rodar-ubuntu.sh
+  install-windows.bat / rodar-windows.bat
