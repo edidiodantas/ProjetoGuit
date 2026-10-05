@@ -298,46 +298,63 @@ st.html(
         background: linear-gradient(180deg, #0B4F6C 0%, #0a3f56 100%);
         border-right: none;
     }}
-    /* Texto claro na sidebar — SEM forçar cor em * (quebra contraste de code/botões) */
-    section[data-testid="stSidebar"] .stMarkdown,
+    /* Texto claro na sidebar — NÃO forçar cor em span/* (vira branco-sobre-branco em code) */
     section[data-testid="stSidebar"] .stMarkdown p,
     section[data-testid="stSidebar"] .stMarkdown li,
-    section[data-testid="stSidebar"] .stMarkdown span,
     section[data-testid="stSidebar"] [data-testid="stWidgetLabel"],
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] li,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3 {{
         color: #F4FAFC !important;
     }}
-    /* Code chips legíveis: fundo escuro + texto claro */
+    /* Chips/código: fundo CLARO + texto ESCURO (legível mesmo se o tema falhar) */
     section[data-testid="stSidebar"] code,
-    section[data-testid="stSidebar"] code *,
     section[data-testid="stSidebar"] .stMarkdown code,
-    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] code {{
-        background: rgba(0, 0, 0, 0.45) !important;
-        color: #FFFFFF !important;
-        border: 1px solid rgba(255, 255, 255, 0.28) !important;
-        padding: 0.15rem 0.45rem !important;
+    section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] code,
+    section[data-testid="stSidebar"] .cfg-chip {{
+        background: #F4FAFC !important;
+        color: #0B4F6C !important;
+        -webkit-text-fill-color: #0B4F6C !important;
+        border: 1px solid #C9D9E1 !important;
+        padding: 0.12rem 0.4rem !important;
         border-radius: 6px !important;
         font-weight: 600 !important;
+        font-size: 0.88em !important;
+    }}
+    section[data-testid="stSidebar"] code *,
+    section[data-testid="stSidebar"] .cfg-chip * {{
+        color: #0B4F6C !important;
+        -webkit-text-fill-color: #0B4F6C !important;
+        background: transparent !important;
     }}
     section[data-testid="stSidebar"] strong {{
         color: #FFFFFF !important;
     }}
     section[data-testid="stSidebar"] [data-testid="stAlert"] {{
-        background: rgba(255,255,255,0.12) !important;
-        border: 1px solid rgba(255,255,255,0.22) !important;
+        background: rgba(255,255,255,0.14) !important;
+        border: 1px solid rgba(255,255,255,0.28) !important;
         color: #F4FAFC !important;
     }}
-    section[data-testid="stSidebar"] [data-testid="stAlert"] * {{
+    section[data-testid="stSidebar"] [data-testid="stAlert"] p,
+    section[data-testid="stSidebar"] [data-testid="stAlert"] [data-testid="stMarkdownContainer"],
+    section[data-testid="stSidebar"] [data-testid="stAlert"] [data-testid="stMarkdownContainer"] p {{
         color: #F4FAFC !important;
     }}
     /* Botão da sidebar com contraste */
-    section[data-testid="stSidebar"] div[data-testid="stButton"] > button {{
-        background: rgba(255,255,255,0.95) !important;
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button,
+    section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] {{
+        background: #F4FAFC !important;
         color: #0B4F6C !important;
-        border: 1px solid rgba(255,255,255,0.5) !important;
+        -webkit-text-fill-color: #0B4F6C !important;
+        border: 1px solid #C9D9E1 !important;
         font-weight: 600 !important;
+    }}
+    section[data-testid="stSidebar"] div[data-testid="stButton"] > button *,
+    section[data-testid="stSidebar"] button[data-testid="stBaseButton-secondary"] * {{
+        color: #0B4F6C !important;
+        -webkit-text-fill-color: #0B4F6C !important;
     }}
     .brand-wrap {{
         display: flex;
@@ -395,60 +412,85 @@ st.html(
         color: var(--furyu-ink) !important;
         letter-spacing: -0.02em;
     }}
-    /* Botões principais: sempre texto branco em fundo escuro (mesmo desabilitado) */
+    /* Botão Perguntar (e demais primary): fundo escuro sólido + texto branco legível */
     div[data-testid="stButton"] > button[kind="primary"],
     div[data-testid="stButton"] > button[kind="primary"]:disabled,
     div[data-testid="stButton"] > button[kind="primary"][disabled],
-    div[data-testid="stButton"] > button[kind="primary"]:hover {{
-        background: linear-gradient(135deg, #0B4F6C, #1B7A9E) !important;
-        border: none !important;
+    div[data-testid="stButton"] > button[kind="primary"]:hover,
+    button[data-testid="stBaseButton-primary"],
+    button[data-testid="stBaseButton-primary"]:disabled,
+    button[data-testid="stBaseButton-primary"][disabled],
+    button[data-testid="stBaseButton-primary"]:hover,
+    div[data-testid="stForm"] [data-testid="stBaseButton-primary"] {{
+        background-color: #0B4F6C !important;
+        background-image: none !important;
+        border: 1px solid #0B4F6C !important;
         color: #FFFFFF !important;
-        font-weight: 600 !important;
+        -webkit-text-fill-color: #FFFFFF !important;
+        font-weight: 700 !important;
         opacity: 1 !important;
         box-shadow: 0 8px 18px rgba(11, 79, 108, 0.22);
     }}
     div[data-testid="stButton"] > button[kind="primary"]:disabled,
-    div[data-testid="stButton"] > button[kind="primary"][disabled] {{
-        background: #5f8799 !important;
+    div[data-testid="stButton"] > button[kind="primary"][disabled],
+    button[data-testid="stBaseButton-primary"]:disabled,
+    button[data-testid="stBaseButton-primary"][disabled] {{
+        background-color: #3d6d82 !important;
+        background-image: none !important;
+        border-color: #3d6d82 !important;
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
         opacity: 1 !important;
         box-shadow: none !important;
     }}
-    div[data-testid="stButton"] > button[kind="primary"] * {{
+    div[data-testid="stButton"] > button[kind="primary"] *,
+    button[data-testid="stBaseButton-primary"] *,
+    button[data-testid="stBaseButton-primary"] p,
+    button[data-testid="stBaseButton-primary"] span,
+    button[data-testid="stBaseButton-primary"] div {{
         color: #FFFFFF !important;
+        -webkit-text-fill-color: #FFFFFF !important;
     }}
-    div[data-testid="stButton"] > button[kind="primary"]:hover:not(:disabled) {{
+    div[data-testid="stButton"] > button[kind="primary"]:hover:not(:disabled),
+    button[data-testid="stBaseButton-primary"]:hover:not(:disabled) {{
+        background-color: #1B7A9E !important;
         transform: translateY(-1px);
         box-shadow: 0 10px 22px rgba(11, 79, 108, 0.28);
     }}
-    div[data-testid="stButton"] > button[kind="secondary"] {{
+    div[data-testid="stButton"] > button[kind="secondary"],
+    button[data-testid="stBaseButton-secondary"] {{
         border: 1px solid var(--furyu-line) !important;
-        color: var(--furyu-ink) !important;
-        background: rgba(255,255,255,0.92) !important;
+        color: #0B4F6C !important;
+        -webkit-text-fill-color: #0B4F6C !important;
+        background: #FFFFFF !important;
     }}
-    div[data-testid="stButton"] > button[kind="secondary"] * {{
-        color: var(--furyu-ink) !important;
+    div[data-testid="stButton"] > button[kind="secondary"] *,
+    button[data-testid="stBaseButton-secondary"] * {{
+        color: #0B4F6C !important;
+        -webkit-text-fill-color: #0B4F6C !important;
     }}
-    /* Inputs da área principal: texto escuro em fundo claro */
+    /* Inputs: texto escuro em fundo branco (nunca branco-sobre-branco) */
     [data-testid="stTextInput"] input,
-    [data-testid="stTextArea"] textarea {{
-        color: #1A2B33 !important;
+    [data-testid="stTextInput"] input:disabled,
+    [data-testid="stTextInput"] input:focus,
+    [data-testid="stTextArea"] textarea,
+    [data-testid="stTextArea"] textarea:disabled,
+    [data-testid="stTextArea"] textarea:focus,
+    input[type="text"],
+    input[type="number"],
+    textarea {{
+        color: #102832 !important;
+        -webkit-text-fill-color: #102832 !important;
         background: #FFFFFF !important;
         caret-color: #0B4F6C !important;
     }}
     [data-testid="stTextInput"] input::placeholder,
-    [data-testid="stTextArea"] textarea::placeholder {{
+    [data-testid="stTextArea"] textarea::placeholder,
+    input::placeholder,
+    textarea::placeholder {{
         color: #4a6570 !important;
+        -webkit-text-fill-color: #4a6570 !important;
         opacity: 1 !important;
-    }}
-    /* Texto digitado sempre escuro (evita branco-sobre-branco) */
-    [data-testid="stTextInput"] input,
-    [data-testid="stTextInput"] input:focus,
-    [data-testid="stTextArea"] textarea,
-    [data-testid="stTextArea"] textarea:focus {{
-        color: #102832 !important;
-        -webkit-text-fill-color: #102832 !important;
-        background: #FFFFFF !important;
     }}
     [data-testid="stFileUploader"] {{
         background: rgba(255,255,255,0.72);
@@ -480,15 +522,29 @@ else:
 
 with st.sidebar:
     st.markdown("### Configuração")
-    st.markdown(
+    # Chips com estilo inline (não depende só do CSS global — evita branco-sobre-branco)
+    st.html(
         f"""
-        - **LLM / resumo / agente / enriquecimento**: `{LLM_NAME}`
-        - **Embeddings**: locais (`st-*`)
-        - **PDFs**: `{PDF_DIR}`
-        - **PQA_HOME**: `{PQA_HOME}`
-
-        Troque o modelo no arquivo `.env` (`OLLAMA_MODEL`) para
-        `qwen3.5:4b` ou `qwen3.5:2b` se estiver lento demais.
+        <ul style="color:#F4FAFC; font-family:Ubuntu,sans-serif; line-height:1.7; padding-left:1.1rem; margin:0.3rem 0 0.8rem 0;">
+          <li><strong style="color:#FFFFFF;">LLM / resumo / agente / enriquecimento</strong>:
+            <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">{LLM_NAME}</span></li>
+          <li><strong style="color:#FFFFFF;">Embeddings</strong>: locais
+            (<span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">st-*</span>)</li>
+          <li><strong style="color:#FFFFFF;">PDFs</strong>:
+            <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">{PDF_DIR}</span></li>
+          <li><strong style="color:#FFFFFF;">PQA_HOME</strong>:
+            <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">{PQA_HOME}</span></li>
+        </ul>
+        <p style="color:#F4FAFC; font-family:Ubuntu,sans-serif; font-size:0.92rem; line-height:1.55; margin:0 0 0.8rem 0;">
+          Troque o modelo no arquivo
+          <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">.env</span>
+          (<span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">OLLAMA_MODEL</span>)
+          para
+          <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">qwen3.5:4b</span>
+          ou
+          <span class="cfg-chip" style="background:#F4FAFC;color:#0B4F6C;-webkit-text-fill-color:#0B4F6C;border:1px solid #C9D9E1;padding:0.12rem 0.4rem;border-radius:6px;font-weight:600;">qwen3.5:2b</span>
+          se estiver lento demais.
+        </p>
         """
     )
     st.warning(
