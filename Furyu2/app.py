@@ -352,11 +352,6 @@ st.html(
         padding: 0.4rem 0.6rem;
     }}
     </style>
-    """
-)
-
-st.markdown(
-    f"""
     <div class="brand-wrap">
       {MARK_SVG}
       <div class="brand-text">
@@ -370,8 +365,7 @@ st.markdown(
       <span class="meta-chip">Ollama: {OLLAMA_BASE_URL}</span>
     </div>
     <hr class="section-rule" />
-    """,
-    unsafe_allow_html=True,
+    """
 )
 
 if ollama_ok:
