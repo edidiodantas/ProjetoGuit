@@ -167,6 +167,29 @@ def init_session_state() -> None:
         st.session_state.pending_oa_index = None
     if "oa_index_feedback" not in st.session_state:
         st.session_state.oa_index_feedback = None
+    if "oa_link_feedback" not in st.session_state:
+        st.session_state.oa_link_feedback = None
+
+
+def _queue_oa_download(index: int) -> None:
+    """Callback Streamlit — evita st.rerun() manual (causa removeChild no React)."""
+    st.session_state.pending_oa_index = index
+
+
+def _save_oa_link(index: int) -> None:
+    hits: list = st.session_state.search_hits
+    if index < 0 or index >= len(hits):
+        return
+    hit = hits[index]
+    url = best_open_url(hit)
+    if add_saved_link(title=hit.title, url=url, doi=hit.doi, source=hit.source):
+        st.session_state.oa_link_feedback = "Link guardado para baixar depois."
+    else:
+        st.session_state.oa_link_feedback = "Esse link já estava na lista."
+
+
+def _clear_saved_links_cb() -> None:
+    save_saved_links([])
 
 
 def _format_index_error(exc: BaseException, open_url: str = "") -> str:
@@ -861,6 +884,11 @@ if hits:
         else:
             st.error(payload)
 
+    link_note = st.session_state.oa_link_feedback
+    if link_note:
+        st.session_state.oa_link_feedback = None
+        st.info(link_note)
+
     note = st.session_state.get("search_note") or "catálogo público"
     n_oa = sum(1 for h in hits if h.has_open_pdf)
     st.write(
@@ -893,12 +921,15 @@ if hits:
                 "_",
                 (hit.paper_id or hit.doi or hit.title),
             )[:50]
+            fname = _safe_filename(hit.title, hit.year)
+            already_indexed = fname in st.session_state.indexed_files
             c1, c2, c3 = st.columns(3)
             with c1:
                 if open_url:
                     st.link_button(
                         "Abrir link",
                         open_url,
+                        key=f"lnk-{i}_{slug}",
                         use_container_width=True,
                         help="Abre PDF ou página da revista no navegador",
                     )
@@ -910,36 +941,27 @@ if hits:
                         use_container_width=True,
                     )
             with c2:
-                if st.button(
+                st.button(
                     "Guardar link",
                     key=f"save-{i}_{slug}",
                     disabled=not open_url,
                     use_container_width=True,
                     help="Salva em documentos/links_salvos.json para baixar depois",
-                ):
-                    if add_saved_link(
-                        title=hit.title,
-                        url=open_url,
-                        doi=hit.doi,
-                        source=hit.source,
-                    ):
-                        st.toast("Link guardado para baixar depois.")
-                    else:
-                        st.toast("Esse link já estava na lista.")
+                    on_click=_save_oa_link,
+                    args=(i,),
+                )
             with c3:
-                if st.button(
+                st.button(
                     "Baixar e indexar",
                     key=f"idx-{i}_{slug}",
-                    disabled=not can_index or st.session_state.pending_oa_index is not None,
+                    disabled=not can_index or already_indexed,
                     use_container_width=True,
                     help="Baixa o PDF automaticamente e indexa com Ollama",
-                ):
-                    fname = _safe_filename(hit.title, hit.year)
-                    if fname in st.session_state.indexed_files:
-                        st.info(f"Já indexado: {fname}")
-                    else:
-                        st.session_state.pending_oa_index = i
-                        st.rerun()
+                    on_click=_queue_oa_download,
+                    args=(i,),
+                )
+            if already_indexed:
+                st.caption(f"Já indexado nesta sessão: {fname}")
 
     # Lista persistente de links para baixar depois
     saved = load_saved_links()
@@ -959,10 +981,17 @@ if hits:
                     st.caption(url)
             with sc2:
                 if url:
-                    st.link_button("Abrir", url, use_container_width=True)
-        if st.button("Limpar links guardados", key="clear_saved_links"):
-            save_saved_links([])
-            st.rerun()
+                    st.link_button(
+                        "Abrir",
+                        url,
+                        key=f"saved-lnk-{j}",
+                        use_container_width=True,
+                    )
+        st.button(
+            "Limpar links guardados",
+            key="clear_saved_links",
+            on_click=_clear_saved_links_cb,
+        )
 
 elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
