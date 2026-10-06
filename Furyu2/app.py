@@ -404,19 +404,19 @@ st.html(
         letter-spacing: -0.02em;
         margin: 0;
         line-height: 0.95;
-        /* preenchimento + contorno + extrusão 3D */
+        /* letras em azul-teal vivo + contorno escuro + extrusão 3D */
         color: #1B7A9E;
-        -webkit-text-fill-color: #E8F4F8;
-        -webkit-text-stroke: 2.2px #0B4F6C;
+        -webkit-text-fill-color: #2A97BC;
+        -webkit-text-stroke: 1.8px #062F42;
         paint-order: stroke fill;
         text-shadow:
-            1px 1px 0 #083D54,
+            0 1px 0 rgba(232, 244, 248, 0.85),
+            1px 1px 0 #0B4F6C,
             2px 2px 0 #083D54,
             3px 3px 0 #062F42,
             4px 4px 0 #041C28,
-            5px 6px 10px rgba(11, 79, 108, 0.28);
+            5px 6px 12px rgba(11, 79, 108, 0.32);
         animation: furyu-title-in 0.7s ease-out both;
-        filter: drop-shadow(0 2px 0 rgba(255, 255, 255, 0.35));
     }}
     @keyframes furyu-title-in {{
         from {{ opacity: 0; transform: translateX(-8px) translateY(4px); }}
