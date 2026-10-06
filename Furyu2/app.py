@@ -209,7 +209,7 @@ _MARK_PNG_B64 = base64.b64encode(
 ).decode("ascii")
 MARK_IMG = (
     f'<img class="furyu-mark" src="data:image/png;base64,{_MARK_PNG_B64}" '
-    f'width="122" height="88" alt="Furyu — livro aberto com páginas coloridas" />'
+    f'width="108" height="72" alt="Furyu — livro aberto deitado com páginas coloridas" />'
 )
 
 _UBUNTU_CSS = (ROOT / "assets" / "fonts.css").read_text(encoding="utf-8")
@@ -272,14 +272,6 @@ st.html(
     }}
     textarea {{
         resize: none !important;
-    }}
-    .app-section-title {{
-        font-family: 'Ubuntu', sans-serif !important;
-        font-weight: 700 !important;
-        font-size: 1.45rem;
-        color: var(--furyu-ink);
-        margin: 1rem 0 0.35rem 0;
-        letter-spacing: -0.02em;
     }}
     /* Botão Perguntar: tamanho mínimo */
     div[data-testid="stForm"] [data-testid="stBaseButton-primary"],
@@ -366,87 +358,110 @@ st.html(
         color: #0B4F6C !important;
         -webkit-text-fill-color: #0B4F6C !important;
     }}
+    /* —— Marca / UX: hierarquia clara, marca + título, sem ruído —— */
     .brand-wrap {{
         display: flex;
         align-items: center;
-        gap: 1.15rem;
-        margin: 0.2rem 0 0.35rem 0;
+        gap: 1rem;
+        margin: 0.15rem 0 0.5rem 0;
+        min-height: 88px;
     }}
     .brand-wrap .furyu-mark {{
         flex-shrink: 0;
-        width: 122px;
-        height: 88px;
+        width: 108px;
+        height: 72px;
         display: block;
         object-fit: contain;
-        transform-origin: 50% 85%;
-        filter: drop-shadow(0 8px 16px rgba(11, 79, 108, 0.22));
-        animation: furyu-mark-float 5s ease-in-out infinite;
-    }}
-    @keyframes furyu-mark-float {{
-        0%, 100% {{ transform: translateY(0); }}
-        50% {{ transform: translateY(-4px); }}
-    }}
-    @media (prefers-reduced-motion: reduce) {{
-        .brand-wrap .furyu-mark {{
-            animation: none !important;
-            transform: none !important;
-        }}
+        filter: drop-shadow(0 6px 14px rgba(11, 79, 108, 0.2));
     }}
     .brand-text {{
         display: flex;
         flex-direction: column;
-        gap: 0.2rem;
+        gap: 0.25rem;
+        min-width: 0;
     }}
     .app-title {{
         font-family: 'Ubuntu', sans-serif !important;
         font-weight: 700 !important;
-        font-size: clamp(2.8rem, 5vw, 4.1rem);
+        font-size: clamp(2.4rem, 4.5vw, 3.6rem);
         letter-spacing: -0.02em;
         margin: 0;
-        line-height: 0.95;
-        /* letras em azul-teal vivo + contorno escuro + extrusão 3D */
-        color: #1B7A9E;
-        -webkit-text-fill-color: #2A97BC;
-        -webkit-text-stroke: 1.8px #062F42;
+        line-height: 1;
+        color: #0B4F6C;
+        -webkit-text-fill-color: #1B7A9E;
+        -webkit-text-stroke: 1.4px #062F42;
         paint-order: stroke fill;
+        /* 3D suave — legível, sem exagero (UX) */
         text-shadow:
-            0 1px 0 rgba(232, 244, 248, 0.85),
-            1px 1px 0 #0B4F6C,
-            2px 2px 0 #083D54,
-            3px 3px 0 #062F42,
-            4px 4px 0 #041C28,
-            5px 6px 12px rgba(11, 79, 108, 0.32);
-        animation: furyu-title-in 0.7s ease-out both;
-    }}
-    @keyframes furyu-title-in {{
-        from {{ opacity: 0; transform: translateX(-8px) translateY(4px); }}
-        to {{ opacity: 1; transform: translateX(0) translateY(0); }}
+            1px 1px 0 #083D54,
+            2px 2px 0 #062F42,
+            3px 4px 8px rgba(11, 79, 108, 0.25);
     }}
     .app-tagline {{
         font-family: 'Ubuntu', sans-serif !important;
-        font-size: 1.05rem;
+        font-size: 1rem;
+        line-height: 1.35;
         color: #456574;
         margin: 0;
+        max-width: 36rem;
     }}
     .meta-strip {{
         display: flex;
         flex-wrap: wrap;
-        gap: 0.45rem;
-        margin: 0.55rem 0 0.85rem 0;
+        gap: 0.4rem;
+        margin: 0.35rem 0 0.75rem 0;
     }}
     .meta-chip {{
-        font-size: 0.84rem;
-        color: var(--furyu-ink);
-        background: rgba(232, 244, 248, 0.92);
-        border: 1px solid var(--furyu-line);
-        padding: 0.28rem 0.7rem;
+        font-family: 'Ubuntu', sans-serif !important;
+        font-size: 0.8rem;
+        color: #0B4F6C;
+        background: #E8F4F8;
+        border: 1px solid #C9D9E1;
+        padding: 0.22rem 0.65rem;
         border-radius: 999px;
     }}
     .section-rule {{
         height: 1px;
         background: linear-gradient(90deg, var(--furyu-line), transparent);
-        margin: 0.35rem 0 0.85rem 0;
+        margin: 0.2rem 0 0.9rem 0;
         border: 0;
+    }}
+    .app-section-title {{
+        font-family: 'Ubuntu', sans-serif !important;
+        font-weight: 700 !important;
+        font-size: 1.35rem;
+        color: var(--furyu-ink);
+        margin: 1.15rem 0 0.4rem 0;
+        letter-spacing: -0.02em;
+    }}
+    /* foco em inputs — UX de formulário */
+    [data-testid="stTextInput"] input:focus,
+    [data-testid="stTextArea"] textarea:focus {{
+        border-color: #1B7A9E !important;
+        box-shadow: 0 0 0 2px rgba(27, 122, 158, 0.22) !important;
+    }}
+    /* botões: alvo de clique claro */
+    div[data-testid="stButton"] > button {{
+        min-height: 2.6rem !important;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }}
+    div[data-testid="stButton"] > button:hover:not(:disabled) {{
+        transform: translateY(-1px);
+    }}
+    @media (max-width: 640px) {{
+        .brand-wrap {{
+            gap: 0.75rem;
+        }}
+        .brand-wrap .furyu-mark {{
+            width: 86px;
+            height: 58px;
+        }}
+        .app-title {{
+            font-size: 2.2rem;
+        }}
+        .app-tagline {{
+            font-size: 0.92rem;
+        }}
     }}
     h2, h3 {{
         color: var(--furyu-ink) !important;

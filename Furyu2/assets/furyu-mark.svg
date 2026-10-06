@@ -1,80 +1,68 @@
-<svg class="furyu-mark" width="140" height="92" viewBox="0 0 140 92" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Furyu — livro aberto com páginas coloridas">
+<svg class="furyu-mark" width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Furyu — livro aberto deitado">
   <defs>
-    <linearGradient id="coverL" x1="4" y1="40" x2="66" y2="86" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0E5A7A"/>
+    <linearGradient id="pageL" x1="8" y1="50" x2="56" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F6E05E"/>
+      <stop offset="45%" stop-color="#F08A4A"/>
+      <stop offset="100%" stop-color="#E85080"/>
+    </linearGradient>
+    <linearGradient id="pageR" x1="64" y1="20" x2="112" y2="50" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8050E0"/>
+      <stop offset="45%" stop-color="#3A88E8"/>
+      <stop offset="100%" stop-color="#50D878"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="10" y1="40" x2="110" y2="70" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B4F6C"/>
       <stop offset="1" stop-color="#062F42"/>
     </linearGradient>
-    <linearGradient id="coverR" x1="74" y1="36" x2="136" y2="84" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#1B7A9E"/>
-      <stop offset="1" stop-color="#0B4F6C"/>
-    </linearGradient>
-    <linearGradient id="creamL" x1="18" y1="28" x2="68" y2="78" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFDF9"/>
-      <stop offset="1" stop-color="#F0E2D0"/>
-    </linearGradient>
-    <linearGradient id="creamR" x1="72" y1="26" x2="122" y2="76" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFDF9"/>
-      <stop offset="1" stop-color="#F0E2D0"/>
-    </linearGradient>
-    <linearGradient id="edgeL" x1="10" y1="50" x2="28" y2="50" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#F6E05E"/>
-      <stop offset="35%" stop-color="#F0A03A"/>
-      <stop offset="65%" stop-color="#E85A5A"/>
-      <stop offset="100%" stop-color="#C848A0"/>
-    </linearGradient>
-    <linearGradient id="edgeR" x1="112" y1="48" x2="130" y2="48" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#8A48E0"/>
-      <stop offset="35%" stop-color="#3A7AE8"/>
-      <stop offset="65%" stop-color="#2AB8E0"/>
-      <stop offset="100%" stop-color="#6AD85A"/>
-    </linearGradient>
-    <filter id="soft" x="-12%" y="-12%" width="124%" height="130%">
-      <feDropShadow dx="0" dy="3" stdDeviation="2.3" flood-color="#0B4F6C" flood-opacity="0.25"/>
+    <filter id="s" x="-15%" y="-20%" width="130%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.2" flood-color="#0B4F6C" flood-opacity="0.24"/>
     </filter>
   </defs>
 
-  <ellipse cx="70" cy="86" rx="52" ry="5" fill="#0B4F6C" opacity="0.15"/>
+  <ellipse cx="60" cy="72" rx="42" ry="4.5" fill="#0B4F6C" opacity="0.14"/>
 
-  <g filter="url(#soft)">
-    <!-- capas -->
-    <path d="M6 44 L66 34 L68 80 L10 86 Z" fill="url(#coverL)"/>
-    <path d="M6 44 L10 40 L70 30 L66 34 Z" fill="#0A455E"/>
-    <path d="M6 44 L10 86 L14 87 L10 46 Z" fill="#041C28"/>
+  <g filter="url(#s)">
+    <!--
+      UX icon: livro ABERTO e DEITADO (vista de cima / 3/4).
+      Forma clássica reconhecível + páginas coloridas.
+    -->
 
-    <path d="M74 32 L134 40 L130 84 L72 78 Z" fill="url(#coverR)"/>
-    <path d="M74 32 L78 28 L138 36 L134 40 Z" fill="#1B7A9E"/>
-    <path d="M134 40 L138 36 L134 80 L130 84 Z" fill="#083D54"/>
+    <!-- capa (embaixo) -->
+    <path d="M8 38 L56 32 L58 64 L12 68 Z" fill="url(#cover)"/>
+    <path d="M64 32 L112 36 L108 68 L62 64 Z" fill="url(#cover)"/>
+    <!-- espessura capa -->
+    <path d="M8 38 L12 68 L16 69 L12 40 Z" fill="#041C28"/>
+    <path d="M112 36 L108 68 L112 69 L116 38 Z" fill="#041C28"/>
+    <path d="M12 68 L58 64 L58 67 L12 71 Z" fill="#031820"/>
+    <path d="M62 64 L108 68 L108 71 L62 67 Z" fill="#031820"/>
 
-    <!-- bloco de bordas coloridas (espessura do papel) — esquerdo -->
-    <path d="M12 46 C16 42 22 39 28 37 L32 77 C26 79 18 82 14 84 Z" fill="url(#edgeL)"/>
-    <!-- linhas finas = folhas -->
-    <g stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7">
-      <path d="M16 45 L20 81"/>
-      <path d="M20 43 L24 79"/>
-      <path d="M24 41 L28 78"/>
-    </g>
+    <!-- páginas coloridas abertas (quase planas) -->
+    <path d="M14 36 L56 30 L57 60 L16 64 Z" fill="url(#pageL)"/>
+    <path d="M64 30 L106 34 L104 64 L63 60 Z" fill="url(#pageR)"/>
 
-    <!-- bloco de bordas coloridas — direito -->
-    <path d="M128 42 C124 38 118 35 112 34 L108 76 C114 78 122 80 126 82 Z" fill="url(#edgeR)"/>
-    <g stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="0.7">
-      <path d="M124 41 L120 79"/>
-      <path d="M120 39 L116 77"/>
-      <path d="M116 37 L112 76"/>
-    </g>
+    <!-- folhas extras (borda colorida / profundidade) -->
+    <path d="M14 36 L18 33 L58 28 L56 30 Z" fill="#FFF3D0" opacity="0.55"/>
+    <path d="M64 30 L68 27 L110 31 L106 34 Z" fill="#E8F0FF" opacity="0.45"/>
 
-    <!-- PÁGINAS CREME (maior parte = parece livro) -->
-    <path d="M30 36 C46 32 58 31 68 32 L70 76 C56 78 42 80 32 78 Z" fill="url(#creamL)"/>
-    <path d="M72 31 C84 30 98 31 110 34 L108 76 C96 78 84 77 70 75.5 Z" fill="url(#creamR)"/>
+    <!-- linhas de página (camadas) nas bordas externas -->
+    <path d="M14 40 L16 62" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.2"/>
+    <path d="M18 38 L20 61" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1"/>
+    <path d="M104 38 L102 62" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.2"/>
+    <path d="M100 36 L98 61" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1"/>
+
+    <!-- área de leitura (creme no centro das páginas) -->
+    <path d="M28 34 L54 31 L55 58 L30 61 Z" fill="#FFFDF9" opacity="0.88"/>
+    <path d="M66 31 L92 33 L90 61 L65 58 Z" fill="#FFFDF9" opacity="0.88"/>
 
     <!-- texto -->
-    <path d="M38 46h22M38 52h20M39 58h18M40 64h16"
-          stroke="#0B4F6C" stroke-opacity="0.3" stroke-width="1.2" stroke-linecap="round"/>
-    <path d="M80 44h22M80 50h20M81 56h18M82 62h16"
-          stroke="#0B4F6C" stroke-opacity="0.3" stroke-width="1.2" stroke-linecap="round"/>
+    <path d="M32 40h16M32 46h14M33 52h12" stroke="#0B4F6C" stroke-opacity="0.35" stroke-width="1.3" stroke-linecap="round"/>
+    <path d="M70 40h16M70 46h14M71 52h12" stroke="#0B4F6C" stroke-opacity="0.35" stroke-width="1.3" stroke-linecap="round"/>
 
     <!-- lombada -->
-    <path d="M66 30 L70 26 L76 27 L74 76 L68 77.5 L64 33 Z" fill="#041C28"/>
-    <path d="M69 28 L73 27.5" stroke="#D7EEF5" stroke-width="1.1" opacity="0.5"/>
-    <path d="M69 16 L71 29 L72.5 16.5 Z" fill="#E84870"/>
+    <path d="M54 30 L58 26 L66 27 L64 62 L56 63 L52 34 Z" fill="#041C28"/>
+    <path d="M57 28 L63 27.5" stroke="#D7EEF5" stroke-width="1.1" opacity="0.5"/>
+
+    <!-- marcador -->
+    <path d="M58 14 L60 27 L61.5 14.5 Z" fill="#E84870"/>
   </g>
 </svg>
