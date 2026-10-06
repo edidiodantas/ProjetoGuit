@@ -430,9 +430,6 @@ def search_semantic_scholar(
             r.raise_for_status()
             payload = r.json()
             break
-        else:
-            if last_error:
-                raise last_error
 
     hits: list[PaperHit] = []
     for item in payload.get("data") or []:
