@@ -683,6 +683,7 @@ if uploaded:
             st.write("Extraindo texto e gerando embeddings locais…")
             st.write("Inferindo metadados via modelo Ollama (lento)…")
             try:
+                validate_pdf_has_extractable_text(dest)
                 run_async(index_pdf(dest, settings))
                 st.session_state.indexed_files.add(f.name)
                 status.update(label=f"Indexado: {f.name}", state="complete")
@@ -772,6 +773,7 @@ if hits:
                 if fname in st.session_state.indexed_files:
                     st.info(f"Já indexado: {fname}")
                 else:
+                    indexed_name: str | None = None
                     with st.status(f"Obtendo `{fname}`…", expanded=True) as status:
                         try:
                             st.write("Resolvendo link de PDF aberto…")
@@ -786,14 +788,15 @@ if hits:
                             st.write("Indexando com Ollama (pode demorar)…")
                             run_async(index_pdf(dest, settings))
                             st.session_state.indexed_files.add(dest.name)
+                            indexed_name = dest.name
                             status.update(
                                 label=f"Indexado: {dest.name}", state="complete"
                             )
                         except Exception as exc:  # noqa: BLE001
                             status.update(label="Não foi possível indexar", state="error")
                             st.error(str(exc))
-                    else:
-                        st.success(f"Indexado na sessão: **{dest.name}**")
+                    if indexed_name:
+                        st.success(f"Indexado na sessão: **{indexed_name}**")
 elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
 
