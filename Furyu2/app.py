@@ -814,9 +814,10 @@ if uploaded:
                 validate_pdf_has_extractable_text(dest)
                 run_async(index_pdf(dest, settings))
                 st.session_state.indexed_files.add(f.name)
-                status.update(label=f"Indexado: {f.name}", state="complete")
+                status.update(label=f"Pronto: {f.name}", state="complete")
             except Exception as exc:  # noqa: BLE001
-                status.update(label=f"Erro ao indexar {f.name}", state="error")
+                # Evitar label começando com "Erro" — o Streamlit prefixa "Error" e vira "rrorErro"
+                status.update(label=f"Falha ao indexar {f.name}", state="error")
                 st.error(f"Falha: {exc}")
 
 if st.session_state.indexed_files:
@@ -1046,7 +1047,7 @@ if ask_clicked:
             st.session_state.last_answer = session
             status.update(label="Resposta pronta", state="complete")
         except Exception as exc:  # noqa: BLE001
-            status.update(label="Erro na consulta", state="error")
+            status.update(label="Falha na consulta", state="error")
             st.error(f"Falha: {exc}")
             st.session_state.last_answer = None
 

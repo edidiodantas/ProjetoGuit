@@ -184,13 +184,31 @@ Checklist de testes manuais de interface (UI/UX) antes de uso em produção (amb
 
 | Campo | Valor |
 |-------|--------|
-| Data | |
-| Tester | |
-| Commit / branch | |
-| Navegador / SO | |
-| Resultado (go/no-go) | |
-| Bugs abertos | |
+| Data | 2026-10-06 |
+| Tester | Cloud Agent (Playwright + inspeção visual de screenshots) |
+| Commit / branch | `cursor/furyu2-ubuntu-1878` |
+| Navegador / SO | Chromium headless · Linux cloud VM |
+| Resultado (go/no-go) | **Go condicional** para smoke/busca/guardar/erros de upload; indexação feliz do PDF de teste precisa de &gt;4 min na 1ª carga (embeddings HF) — timeout de 4 min no runner não concluiu; PaperQA `aadd` do mesmo PDF passou isolado |
+| Bugs abertos | (corrigido nesta rodada) label Streamlit `rrorErro` → usar “Falha ao indexar…”. Observação: uploader Streamlit ainda exibe “200MB” nativo; app rejeita &gt;40 MB no código |
+
+### Resultado por seção (execução 2026-10-06)
+
+| Seção | Resultado | Evidência |
+|-------|----------|-----------|
+| 0 Smoke | Pass (UI carregou após restart; banner Ollama ok; logo Furyu) | `qa_01_smoke_home.png` |
+| 1 Sidebar / Limpar | Pass | `qa_02_limpar_sessao.png` |
+| 2 Upload fake PDF | Pass — “não parece um PDF válido” | `qa_06_fake_pdf.png` |
+| 2 Upload scan | Pass — falha de indexação (sem texto) | `qa_07_scan_pdf.png` |
+| 2 Upload PDF ok | Parcial — validação OK; indexação ainda em andamento/timeout no runner (~4 min); `aadd` isolado OK | `qa_08_index_result.png` + log PaperQA |
+| 3 Busca vazia | Pass — “Digite um tema…” | `qa_03_empty_search.png` |
+| 3 Busca “educação ambiental” | Pass — 8 resultados Oasisbr + 3 botões | `qa_04_search_results.png` |
+| 3 Guardar link | Pass | `qa_05_guardar_link.png` |
+| 4 Perguntar E2E | Não executado (depende de indexação concluída na sessão UI) | — |
+| 5 Mobile viewport | Pass smoke | `qa_10_mobile.png` |
 
 ### Notas
 
+- Antes do teste a app mostrava `ImportError: MAX_PDF_BYTES` por processo Streamlit antigo — **reinício** resolveu.
+- Primeira indexação local baixa pesos HuggingFace e pode passar de 4 minutos; o checklist deve esperar isso em produção escolar.
+- Log bruto: `/opt/cursor/artifacts/qa_ui_checklist_run.log`
 _
