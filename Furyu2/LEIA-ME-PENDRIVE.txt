@@ -9,6 +9,8 @@ IMPORTANTE
 1. NÃO rode o programa de dentro do pendrive (exFAT quebra o .venv).
 2. Copie a pasta Furyu2 INTEIRA para o disco do PC:
      Ubuntu:  ~/Furyu2
+   Ou, se trouxe o .tar.gz:
+     tar -xzf Furyu2-ubuntu-pendrive.tar.gz -C ~
 3. Siga o guia IMPRESSO / TXT:
      INSTALAR-UBUNTU-LTS.txt   ← use este para acompanhar a instalação
    Ou o Markdown:
@@ -17,6 +19,7 @@ IMPORTANTE
      bash install-ubuntu.sh
 5. Ollama + modelo:
      ollama pull qwen3.5:4b
+     (PC fraco: qwen3.5:2b)
 6. Abrir a interface:
      bash rodar-ubuntu.sh
 7. Navegador: http://localhost:8501
@@ -28,17 +31,31 @@ FLUXO DE ARTIGOS
 2. Baixar e indexar  OU  Abrir / Guardar link (para baixar depois)
    Links guardados: documentos/links_salvos.json
 
+VALIDAÇÃO (OPCIONAL)
+--------------------
+  Unitários (busca/PDF):
+    pip install -r requirements-dev.txt
+    pytest
+  Avaliação RAG (anti-alucinação):
+    pip install -r testes/requirements-avaliacao.txt
+    python testes/run_avaliacao.py
+  Checklist UI: CHECKLIST-QA-UI.md
+
 ARQUIVOS IMPORTANTES
 --------------------
   INSTALAR-UBUNTU-LTS.txt   ← checklist para imprimir
   INSTALAR-UBUNTU.md
   install-ubuntu.sh
   rodar-ubuntu.sh
+  empacotar-para-pendrive.sh
+  copiar-para-pendrive.sh
   FUNCOES.txt
   README.md
-  copiar-para-pendrive.sh   ← no PC Linux, copia Furyu2 para o pendrive
+  testes/                  ← plano e testes RAG
+  CHECKLIST-QA-UI.md
 
 GIT
 ---
   https://github.com/edidiodantas/ProjetoGuit
-  branch: cursor/furyu2-ubuntu-1878
+  branch de trabalho recente: cursor/furyu2-ubuntu-1878
+  (ou main, se já tiver sido mesclado)

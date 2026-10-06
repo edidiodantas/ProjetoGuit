@@ -41,12 +41,17 @@ mkdir -p "$DEST"
 rsync -a --delete \
   --exclude '.venv/' \
   --exclude '.pqa/' \
+  --exclude 'testes/.pqa_eval/' \
   --exclude '__pycache__/' \
   --exclude '*.pyc' \
+  --exclude '.pytest_cache/' \
+  --exclude '.coverage' \
+  --exclude 'htmlcov/' \
   --exclude '.env' \
   --exclude 'documentos/*.pdf' \
   --exclude 'linux-env/' \
   --exclude 'linux-env.img' \
+  --exclude '.git/' \
   "$ROOT"/ "$DEST"/
 
 # Garante o guia TXT no pendrive
@@ -64,3 +69,7 @@ echo "  1. cp -a /media/\$USER/*/Furyu2 ~/Furyu2"
 echo "  2. Siga INSTALAR-UBUNTU-LTS.txt (imprimir/acompanhar)"
 echo "  3. cd ~/Furyu2 && bash install-ubuntu.sh"
 echo "  4. bash rodar-ubuntu.sh"
+echo ""
+echo "Dica: se preferir um único arquivo, rode também:"
+echo "  bash empacotar-para-pendrive.sh"
+echo "e copie Furyu2-ubuntu-pendrive.tar.gz para o pendrive."

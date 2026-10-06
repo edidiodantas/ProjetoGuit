@@ -1,6 +1,6 @@
 # Relatório RAG Furyu
 
-- Gerado em: `2026-10-06T17:41:26.911118+00:00`
+- Gerado em: `2026-10-06T18:54:35.287752+00:00`
 - pytest exit: **0** (PASS)
 
 ## Pilares

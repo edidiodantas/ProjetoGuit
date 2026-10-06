@@ -34,7 +34,21 @@ Opção 1 · Pendrive
   [ ] Confira se existem: app.py  install-ubuntu.sh  rodar-ubuntu.sh
                           requirements.txt  INSTALAR-UBUNTU-LTS.txt
 
-Opção 2 · Git (se não tiver pendrive)
+Opção 2 · Arquivo .tar.gz no pendrive
+  [ ] No PC atual, se tiver a pasta Furyu2:
+
+      cd ~/Furyu2   # ou onde estiver a pasta
+      bash empacotar-para-pendrive.sh
+      # copie Furyu2-ubuntu-pendrive.tar.gz para o pendrive
+
+  [ ] No PC novo Ubuntu:
+
+      tar -xzf /media/$USER/*/Furyu2-ubuntu-pendrive.tar.gz -C ~
+      cd ~/Furyu2
+      ls
+
+
+Opção 3 · Git (se não tiver pendrive)
   [ ] No Terminal:
 
       cd ~
@@ -138,6 +152,29 @@ PASSO F — TESTE RÁPIDO (acompanhamento)
       baixe o PDF no navegador e use Enviar PDFs
   [ ] 3. Pergunta — faça uma pergunta e aguarde (1ª vez pode demorar)
   [ ] Abra "Mostrar fontes"
+
+
+--------------------------------------------------------------------------------
+PASSO G — VALIDAR TESTES AUTOMÁTICOS (opcional, recomendado)
+--------------------------------------------------------------------------------
+
+  [ ] Unitários (módulo de busca acadêmica):
+
+      cd ~/Furyu2
+      source .venv/bin/activate
+      pip install -r requirements-dev.txt
+      pytest
+
+      Esperado: 58 passed · cobertura 100% em academic_search.py
+
+  [ ] Avaliação RAG (retrieval + faithfulness + edge cases):
+
+      pip install -r testes/requirements-avaliacao.txt
+      python testes/run_avaliacao.py
+
+      Esperado: 6 passed (1 skipped = juiz DeepEval opcional)
+
+  [ ] Checklist visual: abra CHECKLIST-QA-UI.md
 
 
 --------------------------------------------------------------------------------
