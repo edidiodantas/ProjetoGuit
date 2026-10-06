@@ -16,31 +16,46 @@
     </linearGradient>
   </defs>
 
-  <!-- Páginas coloridas abertas (destaque) -->
-  <path fill="url(#leafL)" opacity="0.95"
+  <!-- Páginas coloridas abertas (destaque) — fills sólidos + gradiente -->
+  <path fill="#F08A45"
         d="M18 56
            C22 34, 42 22, 70 26
            C78 28, 82 36, 84 48
            L82 66
            C58 72, 32 70, 18 56 Z"/>
-  <path fill="url(#leafR)" opacity="0.95"
+  <path fill="url(#leafL)" opacity="0.85"
+        d="M18 56
+           C22 34, 42 22, 70 26
+           C78 28, 82 36, 84 48
+           L82 66
+           C58 72, 32 70, 18 56 Z"/>
+  <path fill="#3B8FE8"
+        d="M84 48
+           C86 36, 90 28, 98 26
+           C126 22, 146 34, 150 56
+           C136 70, 110 72, 86 66
+           L84 48 Z"/>
+  <path fill="url(#leafR)" opacity="0.85"
         d="M84 48
            C86 36, 90 28, 98 26
            C126 22, 146 34, 150 56
            C136 70, 110 72, 86 66
            L84 48 Z"/>
 
-  <!-- Folha de leitura (creme) — limpa, sem texto -->
-  <path fill="#FFFCFA" opacity="0.72"
-        d="M32 52 C38 38, 52 30, 72 32 L76 58 C56 62, 40 60, 32 52 Z"/>
-  <path fill="#FFFCFA" opacity="0.72"
-        d="M92 32 C112 30, 128 38, 136 52 C128 60, 112 62, 92 58 L92 32 Z"/>
+  <!-- Folhas internas coloridas (camadas) -->
+  <path fill="#FFE08A" opacity="0.55"
+        d="M28 54 C34 40, 50 30, 72 33 L76 56 C54 60, 36 58, 28 54 Z"/>
+  <path fill="#A8D4FF" opacity="0.5"
+        d="M92 33 C114 30, 130 40, 140 54 C132 58, 114 60, 92 56 L92 33 Z"/>
+
+  <!-- Área de leitura creme (clean) -->
+  <path fill="#FFFCFA" opacity="0.78"
+        d="M36 50 C42 38, 54 32, 72 34 L76 56 C56 60, 42 58, 36 50 Z"/>
+  <path fill="#FFFCFA" opacity="0.78"
+        d="M92 34 C110 32, 124 38, 132 50 C124 58, 110 60, 92 56 L92 34 Z"/>
 
   <!--
-    ONE-LINE contínuo:
-    começa na ponta esquerda da capa, sobe pelo arco das páginas esquerdas,
-    desce no vale da lombada, sobe nas páginas direitas, desce a capa direita,
-    volta pela base e fecha no ponto inicial — um único path.
+    ONE-LINE contínuo: capa esq. → páginas → lombada → páginas dir. → capa dir. → base → fecha.
   -->
   <path
     fill="none"
@@ -63,17 +78,15 @@
        C 32 78, 18 70, 16 58
        Z"/>
 
-  <!-- Sulco da lombada (mesmo traço, como continuação do one-line no centro) -->
   <path fill="none" stroke="#0B4F6C" stroke-width="2.5" stroke-linecap="round"
         d="M84 28 C84 40, 84 52, 84 74"/>
 
-  <!-- Linhas de página — traço fino, limpo -->
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.15" stroke-linecap="round"
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.3" stroke-width="1.15" stroke-linecap="round"
         d="M34 50 C46 38, 58 32, 74 34"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.2" stroke-width="1.05" stroke-linecap="round"
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.22" stroke-width="1.05" stroke-linecap="round"
         d="M36 58 C48 48, 60 42, 76 44"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.15" stroke-linecap="round"
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.3" stroke-width="1.15" stroke-linecap="round"
         d="M94 34 C110 32, 122 38, 134 50"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.2" stroke-width="1.05" stroke-linecap="round"
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.22" stroke-width="1.05" stroke-linecap="round"
         d="M92 44 C108 42, 120 48, 132 58"/>
 </svg>
