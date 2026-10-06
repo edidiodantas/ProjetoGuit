@@ -469,11 +469,11 @@ st.html(
     }}
     .brand-wrap .furyu-mark {{
         flex-shrink: 0;
-        width: 108px;
+        width: 120px;
         height: 72px;
         display: block;
         object-fit: contain;
-        filter: drop-shadow(0 6px 14px rgba(11, 79, 108, 0.2));
+        filter: drop-shadow(0 4px 10px rgba(11, 79, 108, 0.16));
     }}
     .brand-text {{
         display: flex;
@@ -554,7 +554,7 @@ st.html(
             gap: 0.75rem;
         }}
         .brand-wrap .furyu-mark {{
-            width: 86px;
+            width: 96px;
             height: 58px;
         }}
         .app-title {{

@@ -1,68 +1,79 @@
-<svg class="furyu-mark" width="120" height="80" viewBox="0 0 120 80" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Furyu — livro aberto deitado">
+<svg class="furyu-mark" width="168" height="100" viewBox="0 0 168 100" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Furyu — livro deitado aberto em traço contínuo">
+  <!--
+    Silhueta linear (one-line): livro DEITADO, páginas abertas.
+    Visual clean — páginas coloridas em destaque + um traço contínuo.
+  -->
   <defs>
-    <linearGradient id="pageL" x1="8" y1="50" x2="56" y2="20" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#F6E05E"/>
-      <stop offset="45%" stop-color="#F08A4A"/>
-      <stop offset="100%" stop-color="#E85080"/>
+    <linearGradient id="leafL" x1="14" y1="58" x2="78" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#F6D35A"/>
+      <stop offset="50%" stop-color="#F08A45"/>
+      <stop offset="100%" stop-color="#E4577A"/>
     </linearGradient>
-    <linearGradient id="pageR" x1="64" y1="20" x2="112" y2="50" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="#8050E0"/>
-      <stop offset="45%" stop-color="#3A88E8"/>
-      <stop offset="100%" stop-color="#50D878"/>
+    <linearGradient id="leafR" x1="90" y1="30" x2="154" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7A5CE8"/>
+      <stop offset="45%" stop-color="#3B8FE8"/>
+      <stop offset="100%" stop-color="#3DD4A0"/>
     </linearGradient>
-    <linearGradient id="cover" x1="10" y1="40" x2="110" y2="70" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0B4F6C"/>
-      <stop offset="1" stop-color="#062F42"/>
-    </linearGradient>
-    <filter id="s" x="-15%" y="-20%" width="130%" height="150%">
-      <feDropShadow dx="0" dy="3" stdDeviation="2.2" flood-color="#0B4F6C" flood-opacity="0.24"/>
-    </filter>
   </defs>
 
-  <ellipse cx="60" cy="72" rx="42" ry="4.5" fill="#0B4F6C" opacity="0.14"/>
+  <!-- Páginas coloridas abertas (destaque) -->
+  <path fill="url(#leafL)" opacity="0.95"
+        d="M18 56
+           C22 34, 42 22, 70 26
+           C78 28, 82 36, 84 48
+           L82 66
+           C58 72, 32 70, 18 56 Z"/>
+  <path fill="url(#leafR)" opacity="0.95"
+        d="M84 48
+           C86 36, 90 28, 98 26
+           C126 22, 146 34, 150 56
+           C136 70, 110 72, 86 66
+           L84 48 Z"/>
 
-  <g filter="url(#s)">
-    <!--
-      UX icon: livro ABERTO e DEITADO (vista de cima / 3/4).
-      Forma clássica reconhecível + páginas coloridas.
-    -->
+  <!-- Folha de leitura (creme) — limpa, sem texto -->
+  <path fill="#FFFCFA" opacity="0.72"
+        d="M32 52 C38 38, 52 30, 72 32 L76 58 C56 62, 40 60, 32 52 Z"/>
+  <path fill="#FFFCFA" opacity="0.72"
+        d="M92 32 C112 30, 128 38, 136 52 C128 60, 112 62, 92 58 L92 32 Z"/>
 
-    <!-- capa (embaixo) -->
-    <path d="M8 38 L56 32 L58 64 L12 68 Z" fill="url(#cover)"/>
-    <path d="M64 32 L112 36 L108 68 L62 64 Z" fill="url(#cover)"/>
-    <!-- espessura capa -->
-    <path d="M8 38 L12 68 L16 69 L12 40 Z" fill="#041C28"/>
-    <path d="M112 36 L108 68 L112 69 L116 38 Z" fill="#041C28"/>
-    <path d="M12 68 L58 64 L58 67 L12 71 Z" fill="#031820"/>
-    <path d="M62 64 L108 68 L108 71 L62 67 Z" fill="#031820"/>
+  <!--
+    ONE-LINE contínuo:
+    começa na ponta esquerda da capa, sobe pelo arco das páginas esquerdas,
+    desce no vale da lombada, sobe nas páginas direitas, desce a capa direita,
+    volta pela base e fecha no ponto inicial — um único path.
+  -->
+  <path
+    fill="none"
+    stroke="#0B4F6C"
+    stroke-width="2.85"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    d="M 16 58
+       C 14 40, 28 24, 52 22
+       C 66 20, 76 26, 82 40
+       C 84 46, 84 54, 84 62
+       C 84 54, 84 46, 86 40
+       C 92 26, 102 20, 116 22
+       C 140 24, 154 40, 152 58
+       C 150 70, 136 78, 116 80
+       C 102 82, 92 78, 86 70
+       C 84 66, 84 64, 84 62
+       C 84 64, 84 66, 82 70
+       C 76 78, 66 82, 52 80
+       C 32 78, 18 70, 16 58
+       Z"/>
 
-    <!-- páginas coloridas abertas (quase planas) -->
-    <path d="M14 36 L56 30 L57 60 L16 64 Z" fill="url(#pageL)"/>
-    <path d="M64 30 L106 34 L104 64 L63 60 Z" fill="url(#pageR)"/>
+  <!-- Sulco da lombada (mesmo traço, como continuação do one-line no centro) -->
+  <path fill="none" stroke="#0B4F6C" stroke-width="2.5" stroke-linecap="round"
+        d="M84 28 C84 40, 84 52, 84 74"/>
 
-    <!-- folhas extras (borda colorida / profundidade) -->
-    <path d="M14 36 L18 33 L58 28 L56 30 Z" fill="#FFF3D0" opacity="0.55"/>
-    <path d="M64 30 L68 27 L110 31 L106 34 Z" fill="#E8F0FF" opacity="0.45"/>
-
-    <!-- linhas de página (camadas) nas bordas externas -->
-    <path d="M14 40 L16 62" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.2"/>
-    <path d="M18 38 L20 61" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1"/>
-    <path d="M104 38 L102 62" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1.2"/>
-    <path d="M100 36 L98 61" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="1"/>
-
-    <!-- área de leitura (creme no centro das páginas) -->
-    <path d="M28 34 L54 31 L55 58 L30 61 Z" fill="#FFFDF9" opacity="0.88"/>
-    <path d="M66 31 L92 33 L90 61 L65 58 Z" fill="#FFFDF9" opacity="0.88"/>
-
-    <!-- texto -->
-    <path d="M32 40h16M32 46h14M33 52h12" stroke="#0B4F6C" stroke-opacity="0.35" stroke-width="1.3" stroke-linecap="round"/>
-    <path d="M70 40h16M70 46h14M71 52h12" stroke="#0B4F6C" stroke-opacity="0.35" stroke-width="1.3" stroke-linecap="round"/>
-
-    <!-- lombada -->
-    <path d="M54 30 L58 26 L66 27 L64 62 L56 63 L52 34 Z" fill="#041C28"/>
-    <path d="M57 28 L63 27.5" stroke="#D7EEF5" stroke-width="1.1" opacity="0.5"/>
-
-    <!-- marcador -->
-    <path d="M58 14 L60 27 L61.5 14.5 Z" fill="#E84870"/>
-  </g>
+  <!-- Linhas de página — traço fino, limpo -->
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.15" stroke-linecap="round"
+        d="M34 50 C46 38, 58 32, 74 34"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.2" stroke-width="1.05" stroke-linecap="round"
+        d="M36 58 C48 48, 60 42, 76 44"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.15" stroke-linecap="round"
+        d="M94 34 C110 32, 122 38, 134 50"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.2" stroke-width="1.05" stroke-linecap="round"
+        d="M92 44 C108 42, 120 48, 132 58"/>
 </svg>
