@@ -33,6 +33,7 @@ from paperqa.settings import (
 )
 
 from academic_search import (
+    best_open_url,
     download_first_working_pdf,
     resolve_pdf_candidates,
     search_academic,
@@ -61,6 +62,7 @@ def _path_from_env(key: str, default: str) -> Path:
 
 PDF_DIR = _path_from_env("PDF_DIR", "./documentos")
 PQA_HOME = _path_from_env("PQA_HOME", "./.pqa")
+SAVED_LINKS_PATH = PDF_DIR / "links_salvos.json"
 CONTACT_EMAIL = os.getenv("CONTACT_EMAIL", "").strip()
 S2_API_KEY = os.getenv("SEMANTIC_SCHOLAR_API_KEY", "").strip()
 
@@ -167,14 +169,61 @@ def init_session_state() -> None:
         st.session_state.oa_index_feedback = None
 
 
-def _format_index_error(exc: BaseException) -> str:
+def _format_index_error(exc: BaseException, open_url: str = "") -> str:
     msg = str(exc)
     if "Is it empty" in msg or "Could not read document" in msg:
-        return (
+        base = (
             "Não foi possível extrair texto desse PDF (provavelmente é scan/só imagem). "
-            "Use uma versão com texto selecionável, OCR, ou escolha outro artigo."
+            "Abra o link no navegador, baixe o PDF (ou use OCR) e envie em Enviar PDFs."
         )
-    return msg
+    else:
+        base = msg
+    if open_url:
+        return f"{base}\n\nLink para baixar depois: {open_url}"
+    return base
+
+
+def load_saved_links() -> list[dict]:
+    if not SAVED_LINKS_PATH.exists():
+        return []
+    try:
+        data = json.loads(SAVED_LINKS_PATH.read_text(encoding="utf-8"))
+        return data if isinstance(data, list) else []
+    except Exception:  # noqa: BLE001
+        return []
+
+
+def save_saved_links(items: list[dict]) -> None:
+    PDF_DIR.mkdir(parents=True, exist_ok=True)
+    SAVED_LINKS_PATH.write_text(
+        json.dumps(items, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+
+def add_saved_link(*, title: str, url: str, doi: str = "", source: str = "") -> bool:
+    """Guarda link para baixar depois. True se novo; False se já existia."""
+    url = (url or "").strip()
+    if not url:
+        return False
+    items = load_saved_links()
+    for item in items:
+        if (item.get("url") or "").strip() == url:
+            return False
+    from datetime import datetime, timezone
+
+    items.insert(
+        0,
+        {
+            "title": (title or "Sem título").strip(),
+            "url": url,
+            "doi": (doi or "").strip(),
+            "source": (source or "").strip(),
+            "saved_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        },
+    )
+    save_saved_links(items[:200])
+    return True
 
 
 def run_oa_index_job(hit_index: int) -> tuple[str | None, str | None]:
@@ -183,17 +232,22 @@ def run_oa_index_job(hit_index: int) -> tuple[str | None, str | None]:
     if hit_index < 0 or hit_index >= len(hits):
         return None, "Resultado da busca inválido. Busque de novo."
     hit = hits[hit_index]
+    open_url = best_open_url(hit)
     fname = _safe_filename(hit.title, hit.year)
     if fname in st.session_state.indexed_files:
         return None, f"Já indexado: {fname}"
     pdf_urls = resolve_pdf_candidates(hit, CONTACT_EMAIL)
     if not pdf_urls:
+        tip = f" Link: {open_url}" if open_url else ""
         return None, (
-            "Sem PDF em acesso aberto. "
-            "Baixe no SciELO/site da revista e use Enviar PDFs."
+            "Sem PDF em acesso aberto para baixar automaticamente."
+            f"{tip} Guarde o link ou baixe no site e use Enviar PDFs."
         )
-    dest = download_first_working_pdf(pdf_urls, PDF_DIR, fname)
-    validate_pdf_has_extractable_text(dest)
+    try:
+        dest = download_first_working_pdf(pdf_urls, PDF_DIR, fname)
+        validate_pdf_has_extractable_text(dest)
+    except Exception as exc:  # noqa: BLE001
+        return None, _format_index_error(exc, open_url or (pdf_urls[0] if pdf_urls else ""))
     run_async(index_pdf(dest, settings))
     st.session_state.indexed_files.add(dest.name)
     return dest.name, None
@@ -738,9 +792,10 @@ else:
 # --- Busca acadêmica (acesso aberto) ---
 st.html('<div class="app-section-title">2. Buscar artigos (acesso aberto)</div>')
 st.caption(
-    "Não há login. A busca começa no **Oasisbr (IBICT)**, que reúne SciELO, "
-    "repositórios e periódicos brasileiros. Se o Oasisbr falhar, usa Semantic Scholar/Crossref. "
-    "Unpaywall só entra para achar PDF **aberto**. Paywall não é baixado."
+    "**1 · Localizar** no Oasisbr / Unpaywall · "
+    "**2 · Baixar e indexar** quando o PDF tiver texto · "
+    "ou **abrir / guardar o link** para baixar depois e usar em Enviar PDFs. "
+    "Paywall não é baixado. SciELO e PDFs só imagem (scan) às vezes bloqueiam o download automático."
 )
 search_q = st.text_input(
     "Tema ou título",
@@ -790,9 +845,11 @@ if hits:
                 elif indexed_name:
                     st.session_state.oa_index_feedback = ("success", indexed_name)
             except Exception as exc:  # noqa: BLE001
+                hit_ref = hits[job_i] if 0 <= job_i < len(hits) else None
+                open_url = best_open_url(hit_ref) if hit_ref else ""
                 st.session_state.oa_index_feedback = (
                     "error",
-                    _format_index_error(exc),
+                    _format_index_error(exc, open_url),
                 )
 
     feedback = st.session_state.oa_index_feedback
@@ -806,7 +863,10 @@ if hits:
 
     note = st.session_state.get("search_note") or "catálogo público"
     n_oa = sum(1 for h in hits if h.has_open_pdf)
-    st.write(f"{len(hits)} resultado(s) via {note} · {n_oa} com PDF aberto:")
+    st.write(
+        f"{len(hits)} resultado(s) via {note} · {n_oa} com link de PDF/página aberta · "
+        "fluxo: **localizar → baixar/indexar** ou **guardar link**"
+    )
     for i, hit in enumerate(hits):
         with st.container(border=True):
             ano = hit.year or "?"
@@ -820,25 +880,90 @@ if hits:
                 st.caption(f"DOI: {hit.doi}")
             if hit.abstract:
                 st.write(hit.abstract)
-            can_index = ollama_ok and (
-                hit.has_open_pdf or bool(getattr(hit, "landing_url", "")) or bool(hit.doi)
-            )
-            if not hit.has_open_pdf and not getattr(hit, "landing_url", "") and not hit.doi:
-                st.caption("Sem PDF aberto. Baixe no SciELO/revista e use Enviar PDFs.")
-            elif not hit.has_open_pdf:
-                st.caption("PDF pode ser resolvido na hora do download (DOI/página da revista).")
-            btn_key = f"idx-{i}_{re.sub(r'[^a-zA-Z0-9_-]', '_', (hit.paper_id or hit.doi or hit.title))[:50]}"
-            if st.button(
-                "Baixar PDF aberto e indexar",
-                key=btn_key,
-                disabled=not can_index or st.session_state.pending_oa_index is not None,
-            ):
-                fname = _safe_filename(hit.title, hit.year)
-                if fname in st.session_state.indexed_files:
-                    st.info(f"Já indexado: {fname}")
+
+            open_url = best_open_url(hit)
+            can_index = ollama_ok and bool(open_url)
+            if open_url:
+                st.caption(f"Link aberto: {open_url}")
+            else:
+                st.caption("Sem link aberto. Tente outro resultado.")
+
+            slug = re.sub(
+                r"[^a-zA-Z0-9_-]",
+                "_",
+                (hit.paper_id or hit.doi or hit.title),
+            )[:50]
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                if open_url:
+                    st.link_button(
+                        "Abrir link",
+                        open_url,
+                        use_container_width=True,
+                        help="Abre PDF ou página da revista no navegador",
+                    )
                 else:
-                    st.session_state.pending_oa_index = i
-                    st.rerun()
+                    st.button(
+                        "Abrir link",
+                        key=f"open-{i}_{slug}",
+                        disabled=True,
+                        use_container_width=True,
+                    )
+            with c2:
+                if st.button(
+                    "Guardar link",
+                    key=f"save-{i}_{slug}",
+                    disabled=not open_url,
+                    use_container_width=True,
+                    help="Salva em documentos/links_salvos.json para baixar depois",
+                ):
+                    if add_saved_link(
+                        title=hit.title,
+                        url=open_url,
+                        doi=hit.doi,
+                        source=hit.source,
+                    ):
+                        st.toast("Link guardado para baixar depois.")
+                    else:
+                        st.toast("Esse link já estava na lista.")
+            with c3:
+                if st.button(
+                    "Baixar e indexar",
+                    key=f"idx-{i}_{slug}",
+                    disabled=not can_index or st.session_state.pending_oa_index is not None,
+                    use_container_width=True,
+                    help="Baixa o PDF automaticamente e indexa com Ollama",
+                ):
+                    fname = _safe_filename(hit.title, hit.year)
+                    if fname in st.session_state.indexed_files:
+                        st.info(f"Já indexado: {fname}")
+                    else:
+                        st.session_state.pending_oa_index = i
+                        st.rerun()
+
+    # Lista persistente de links para baixar depois
+    saved = load_saved_links()
+    if saved:
+        st.markdown("##### Links guardados para baixar depois")
+        st.caption(
+            f"Arquivo: `{SAVED_LINKS_PATH.name}` em `{PDF_DIR.name}/`. "
+            "Abra no navegador, salve o PDF e use **Enviar PDFs**."
+        )
+        for j, item in enumerate(saved[:30]):
+            title = item.get("title") or "Sem título"
+            url = item.get("url") or ""
+            sc1, sc2 = st.columns([4, 1])
+            with sc1:
+                st.markdown(f"**{title}**")
+                if url:
+                    st.caption(url)
+            with sc2:
+                if url:
+                    st.link_button("Abrir", url, use_container_width=True)
+        if st.button("Limpar links guardados", key="clear_saved_links"):
+            save_saved_links([])
+            st.rerun()
+
 elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
 

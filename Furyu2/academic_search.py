@@ -610,6 +610,20 @@ def resolve_pdf_url(hit: PaperHit, contact_email: str) -> str:
     return cands[0] if cands else ""
 
 
+def best_open_url(hit: PaperHit) -> str:
+    """Melhor URL já conhecida no hit (PDF direto, landing OJS ou DOI) — sem rede."""
+    for url in hit.all_pdf_candidates():
+        if url:
+            return url
+    landing = (hit.landing_url or "").strip()
+    if landing:
+        return landing
+    doi = (hit.doi or "").strip()
+    if doi:
+        return f"https://doi.org/{doi}"
+    return ""
+
+
 def resolve_pdf_candidates(hit: PaperHit, contact_email: str) -> list[str]:
     """Lista ordenada de URLs candidatas a PDF aberto."""
     found: list[str] = list(hit.all_pdf_candidates())

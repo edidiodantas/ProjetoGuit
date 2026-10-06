@@ -4,6 +4,7 @@ __pycache__/
 *.pyc
 .env
 documentos/*.pdf
+documentos/links_salvos.json
 linux-env/
 linux-env.img
 .streamlit/secrets.toml
