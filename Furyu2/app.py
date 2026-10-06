@@ -33,8 +33,8 @@ from paperqa.settings import (
 )
 
 from academic_search import (
-    download_pdf,
-    resolve_pdf_url,
+    download_first_working_pdf,
+    resolve_pdf_candidates,
     search_academic,
     _safe_filename,
 )
@@ -744,9 +744,13 @@ if hits:
                 st.caption(f"DOI: {hit.doi}")
             if hit.abstract:
                 st.write(hit.abstract)
-            can_index = ollama_ok and hit.has_open_pdf
-            if not hit.has_open_pdf:
+            can_index = ollama_ok and (
+                hit.has_open_pdf or bool(getattr(hit, "landing_url", "")) or bool(hit.doi)
+            )
+            if not hit.has_open_pdf and not getattr(hit, "landing_url", "") and not hit.doi:
                 st.caption("Sem PDF aberto. Baixe no SciELO/revista e use Enviar PDFs.")
+            elif not hit.has_open_pdf:
+                st.caption("PDF pode ser resolvido na hora do download (DOI/página da revista).")
             btn_key = f"idx-{i}_{re.sub(r'[^a-zA-Z0-9_-]', '_', (hit.paper_id or hit.doi or hit.title))[:50]}"
             if st.button(
                 "Baixar PDF aberto e indexar",
@@ -760,14 +764,14 @@ if hits:
                     with st.status(f"Obtendo `{fname}`…", expanded=True) as status:
                         try:
                             st.write("Resolvendo link de PDF aberto…")
-                            pdf_url = resolve_pdf_url(hit, CONTACT_EMAIL)
-                            if not pdf_url:
+                            pdf_urls = resolve_pdf_candidates(hit, CONTACT_EMAIL)
+                            if not pdf_urls:
                                 raise RuntimeError(
                                     "Sem PDF em acesso aberto. "
                                     "Baixe no SciELO/site da revista e use Enviar PDFs."
                                 )
-                            st.write("Baixando…")
-                            dest = download_pdf(pdf_url, PDF_DIR, fname)
+                            st.write(f"Baixando ({len(pdf_urls)} link(s) candidato(s))…")
+                            dest = download_first_working_pdf(pdf_urls, PDF_DIR, fname)
                             st.write("Indexando com Ollama (pode demorar)…")
                             run_async(index_pdf(dest, settings))
                             st.session_state.indexed_files.add(dest.name)

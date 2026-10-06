@@ -11,9 +11,9 @@ from __future__ import annotations
 
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urljoin, urlparse
 
 import httpx
 
@@ -25,10 +25,28 @@ SCIELO_PDF = "https://www.scielo.br/scielo.php?script=sci_pdf&pid={pid}&lng=pt&t
 
 _DOI_RE = re.compile(r"10\.\d{4,9}/[^\s\"'<>]+", re.I)
 _PID_RE = re.compile(r"(S\d{4}-\d{4}\d{13})", re.I)
+_OJS_VIEW_RE = re.compile(r"/article/view/\d+", re.I)
+_PDF_HREF_RE = re.compile(
+    r"""(?:href|content)=["']([^"']+(?:article/download/[^"']+|\.pdf)[^"']*)["']""",
+    re.I,
+)
+_PDF_ABS_RE = re.compile(
+    r"""https?://[^\s"'<>]+(?:article/download/[^\s"'<>]+|[^\s"'<>]+\.pdf)""",
+    re.I,
+)
 USER_AGENT = (
     "Furyu/2.0 (MVP educacional; "
     "+https://github.com/edidiodantas/ProjetoGuit)"
 )
+BROWSER_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 "
+        "(KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,"
+    "application/pdf,*/*;q=0.8",
+    "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
+}
 
 
 @dataclass
@@ -42,10 +60,20 @@ class PaperHit:
     abstract: str
     pdf_url: str
     source: str  # oasisbr | scielo | semantic-scholar | crossref | unpaywall
+    landing_url: str = ""
+    pdf_candidates: list[str] = field(default_factory=list)
 
     @property
     def has_open_pdf(self) -> bool:
-        return bool(self.pdf_url)
+        return bool(self.pdf_url or self.pdf_candidates)
+
+    def all_pdf_candidates(self) -> list[str]:
+        ordered: list[str] = []
+        for url in [self.pdf_url, *self.pdf_candidates]:
+            u = (url or "").strip()
+            if u and u not in ordered:
+                ordered.append(u)
+        return ordered
 
 
 def _headers(s2_key: str = "") -> dict[str, str]:
@@ -53,6 +81,37 @@ def _headers(s2_key: str = "") -> dict[str, str]:
     if s2_key:
         h["x-api-key"] = s2_key
     return h
+
+
+def _is_scielo_host(url: str) -> bool:
+    host = (urlparse(url).hostname or "").lower()
+    return "scielo" in host
+
+
+def _prefer_direct_pdf(urls: list[str]) -> list[str]:
+    """Ordena candidatos: PDF direto / OJS download antes de SciELO (anti-bot)."""
+    scored: list[tuple[int, str]] = []
+    for url in urls:
+        u = (url or "").strip()
+        if not u:
+            continue
+        low = u.lower()
+        score = 50
+        if "/article/download/" in low or low.endswith(".pdf"):
+            score -= 20
+        if "format=pdf" in low or "script=sci_pdf" in low:
+            score -= 5
+        if _is_scielo_host(u):
+            score += 30
+        if "doi.org" in low:
+            score += 40
+        scored.append((score, u))
+    scored.sort(key=lambda x: x[0])
+    out: list[str] = []
+    for _, u in scored:
+        if u not in out:
+            out.append(u)
+    return out
 
 
 def _authors(raw: list | None) -> str:
@@ -99,12 +158,18 @@ def _looks_like_pdf_url(url: str) -> bool:
         or "format=pdf" in u
         or "type=printable" in u
         or "script=sci_pdf" in u
+        or "/article/download/" in u
     ):
         return True
     return False
 
 
 def _pdf_from_unpaywall(data: dict) -> str:
+    cands = _pdfs_from_unpaywall(data)
+    return cands[0] if cands else ""
+
+
+def _pdfs_from_unpaywall(data: dict) -> list[str]:
     locations = []
     best = data.get("best_oa_location")
     if best:
@@ -112,14 +177,58 @@ def _pdf_from_unpaywall(data: dict) -> str:
     for loc in data.get("oa_locations") or []:
         if loc and loc not in locations:
             locations.append(loc)
+    found: list[str] = []
     for loc in locations:
         pdf = (loc.get("url_for_pdf") or "").strip()
-        if pdf:
-            return pdf
+        if pdf and pdf not in found:
+            found.append(pdf)
         url = (loc.get("url") or "").strip()
-        if _looks_like_pdf_url(url):
-            return url
-    return ""
+        if url and _looks_like_pdf_url(url) and url not in found:
+            found.append(url)
+    return _prefer_direct_pdf(found)
+
+
+def scrape_landing_pdf_url(landing_url: str, *, client: httpx.Client | None = None) -> str:
+    """Extrai PDF de páginas OJS (/article/view/) via citation_pdf_url / download."""
+    landing_url = (landing_url or "").strip()
+    if not landing_url.startswith("http"):
+        return ""
+    own = client is None
+    if own:
+        client = httpx.Client(timeout=25.0, follow_redirects=True, headers=BROWSER_HEADERS)
+    try:
+        r = client.get(landing_url)
+        if r.status_code >= 400:
+            return ""
+        html = r.text or ""
+        base = str(r.url)
+        cands: list[str] = []
+        for m in _PDF_HREF_RE.finditer(html):
+            cands.append(urljoin(base, m.group(1).strip()))
+        for m in _PDF_ABS_RE.finditer(html):
+            cands.append(m.group(0).rstrip(").,;"))
+        # citation_pdf_url meta (OJS clássico)
+        for m in re.finditer(
+            r'name=["\']citation_pdf_url["\'][^>]*content=["\']([^"\']+)["\']',
+            html,
+            re.I,
+        ):
+            cands.append(urljoin(base, m.group(1).strip()))
+        for m in re.finditer(
+            r'content=["\']([^"\']+)["\'][^>]*name=["\']citation_pdf_url["\']',
+            html,
+            re.I,
+        ):
+            cands.append(urljoin(base, m.group(1).strip()))
+        ranked = _prefer_direct_pdf(
+            [c for c in cands if _looks_like_pdf_url(c) or "/article/download/" in c.lower()]
+        )
+        return ranked[0] if ranked else ""
+    except Exception:
+        return ""
+    finally:
+        if own and client is not None:
+            client.close()
 
 
 def _vufind_authors(authors: dict | None) -> str:
@@ -195,6 +304,7 @@ def search_oasisbr(query: str, *, limit: int = 8) -> list[PaperHit]:
             records = list(payload.get("records") or [])
 
     hits: list[PaperHit] = []
+    landings_to_scrape: list[tuple[PaperHit, str]] = []
     for item in records:
         urls = [(u or {}).get("url") or "" for u in (item.get("urls") or [])]
         blob = " ".join(
@@ -209,25 +319,67 @@ def search_oasisbr(query: str, *, limit: int = 8) -> list[PaperHit]:
         if pid and not doi:
             doi = f"10.1590/{pid}"
         pdf_url = ""
+        landing_url = ""
+        candidates: list[str] = []
         for u in urls:
+            if not u:
+                continue
             if _looks_like_pdf_url(u):
-                pdf_url = u
-                break
+                if not pdf_url:
+                    pdf_url = u
+                if u not in candidates:
+                    candidates.append(u)
+            elif _OJS_VIEW_RE.search(u) or "/article/view/" in u.lower():
+                if not landing_url:
+                    landing_url = u
+            elif "scielo" in u.lower() and "sci_arttext" in u.lower() and pid:
+                # página HTML SciELO — PDF clássico como candidato
+                sci = scielo_pdf_url(pid)
+                if sci and sci not in candidates:
+                    candidates.append(sci)
+            elif not landing_url and u.startswith("http") and "doi.org" not in u.lower():
+                landing_url = landing_url or u
+        if pid and not pdf_url:
+            sci = scielo_pdf_url(pid)
+            if sci and sci not in candidates:
+                candidates.append(sci)
+            if not pdf_url and sci:
+                pdf_url = sci
         source = "scielo" if pid else "oasisbr"
         venue = "SciELO" if pid else "Oasisbr"
-        hits.append(
-            PaperHit(
-                paper_id=str(item.get("id") or doi or item.get("title") or ""),
-                title=(item.get("title") or "Sem título").strip(),
-                year=_year_from_pid(pid),
-                authors=_vufind_authors(item.get("authors")),
-                venue=venue,
-                doi=doi,
-                abstract="",
-                pdf_url=pdf_url,
-                source=source,
-            )
+        hit = PaperHit(
+            paper_id=str(item.get("id") or doi or item.get("title") or ""),
+            title=(item.get("title") or "Sem título").strip(),
+            year=_year_from_pid(pid),
+            authors=_vufind_authors(item.get("authors")),
+            venue=venue,
+            doi=doi,
+            abstract="",
+            pdf_url=pdf_url,
+            source=source,
+            landing_url=landing_url,
+            pdf_candidates=candidates,
         )
+        hits.append(hit)
+        if landing_url and not (pdf_url and "/article/download/" in pdf_url.lower()):
+            landings_to_scrape.append((hit, landing_url))
+
+    if landings_to_scrape:
+        with httpx.Client(timeout=25.0, follow_redirects=True, headers=BROWSER_HEADERS) as client:
+            for hit, landing in landings_to_scrape[:12]:
+                scraped = scrape_landing_pdf_url(landing, client=client)
+                if scraped:
+                    if scraped not in hit.pdf_candidates:
+                        hit.pdf_candidates.insert(0, scraped)
+                    # Prefere download OJS ao PDF SciELO bloqueado
+                    if (
+                        not hit.pdf_url
+                        or _is_scielo_host(hit.pdf_url)
+                        or "/article/download/" in scraped.lower()
+                    ):
+                        hit.pdf_url = scraped
+                        if "unpaywall" not in hit.source and hit.source == "oasisbr":
+                            hit.source = "oasisbr+ojs"
     return hits
 
 
@@ -353,47 +505,55 @@ def search_crossref(query: str, *, email: str = "", limit: int = 8) -> list[Pape
 
 
 def unpaywall_pdf_url(doi: str, email: str, *, client: httpx.Client | None = None) -> str:
+    cands = unpaywall_pdf_urls(doi, email, client=client)
+    return cands[0] if cands else ""
+
+
+def unpaywall_pdf_urls(doi: str, email: str, *, client: httpx.Client | None = None) -> list[str]:
     doi = doi.strip()
     email = email.strip()
     if not doi or "@" not in email:
-        return ""
+        return []
     url = UNPAYWALL.format(doi=quote(doi, safe="/"))
     own = client is None
     if own:
         client = httpx.Client(timeout=30.0, follow_redirects=True, headers={"User-Agent": USER_AGENT})
     try:
         r = client.get(url, params={"email": email})
-        if r.status_code == 404:
-            return ""
-        if r.status_code == 422:
-            raise RuntimeError(
-                "Unpaywall recusou o e-mail. Use um e-mail real em CONTACT_EMAIL no .env."
-            )
+        if r.status_code in (404, 422):
+            # 422 = e-mail rejeitado; não aborta a busca inteira
+            return []
         r.raise_for_status()
         data = r.json()
+    except Exception:
+        return []
     finally:
         if own and client is not None:
             client.close()
-    return _pdf_from_unpaywall(data)
+    return _pdfs_from_unpaywall(data)
 
 
 def attach_unpaywall_pdfs(hits: list[PaperHit], email: str) -> None:
     """Preenche pdf_url via Unpaywall quando o catálogo não trouxe PDF."""
     if "@" not in (email or ""):
         return
-    missing = [h for h in hits if not h.pdf_url and h.doi]
+    missing = [h for h in hits if (not h.pdf_url or _is_scielo_host(h.pdf_url)) and h.doi]
     if not missing:
         return
     with httpx.Client(timeout=30.0, follow_redirects=True, headers={"User-Agent": USER_AGENT}) as client:
         for hit in missing:
-            try:
-                url = unpaywall_pdf_url(hit.doi, email, client=client)
-            except RuntimeError:
-                raise
-            except Exception:
+            urls = unpaywall_pdf_urls(hit.doi, email, client=client)
+            if not urls:
                 continue
-            if url:
-                hit.pdf_url = url
+            for u in urls:
+                if u not in hit.pdf_candidates:
+                    hit.pdf_candidates.append(u)
+            hit.pdf_candidates = _prefer_direct_pdf(hit.pdf_candidates)
+            best = hit.pdf_candidates[0] if hit.pdf_candidates else urls[0]
+            # Troca SciELO por espelho OJS/repositório quando existir
+            if not hit.pdf_url or _is_scielo_host(hit.pdf_url) or not _is_scielo_host(best):
+                hit.pdf_url = best
+            if "unpaywall" not in hit.source:
                 hit.source = f"{hit.source}+unpaywall"
 
 
@@ -446,16 +606,27 @@ def _dedupe(hits: list[PaperHit]) -> list[PaperHit]:
 
 
 def resolve_pdf_url(hit: PaperHit, contact_email: str) -> str:
-    if hit.pdf_url and _looks_like_pdf_url(hit.pdf_url):
-        return hit.pdf_url
+    cands = resolve_pdf_candidates(hit, contact_email)
+    return cands[0] if cands else ""
+
+
+def resolve_pdf_candidates(hit: PaperHit, contact_email: str) -> list[str]:
+    """Lista ordenada de URLs candidatas a PDF aberto."""
+    found: list[str] = list(hit.all_pdf_candidates())
+    if hit.landing_url:
+        scraped = scrape_landing_pdf_url(hit.landing_url)
+        if scraped and scraped not in found:
+            found.insert(0, scraped)
     if hit.doi:
-        url = unpaywall_pdf_url(hit.doi, contact_email)
-        if url:
-            return url
-    pid = _scielo_pid(hit.doi or "", hit.paper_id)
+        for u in unpaywall_pdf_urls(hit.doi, contact_email):
+            if u not in found:
+                found.append(u)
+    pid = _scielo_pid(hit.doi or "", hit.paper_id, hit.landing_url or "")
     if pid:
-        return scielo_pdf_url(pid)
-    return hit.pdf_url or ""
+        sci = scielo_pdf_url(pid)
+        if sci and sci not in found:
+            found.append(sci)
+    return _prefer_direct_pdf(found)
 
 
 def _safe_filename(title: str, year: int | None) -> str:
@@ -470,10 +641,18 @@ def download_pdf(url: str, dest_dir: Path, filename: str) -> Path:
     dest = dest_dir / filename
     if dest.exists():
         dest = dest_dir / f"{dest.stem}_novo{dest.suffix}"
-    headers = {"User-Agent": USER_AGENT, "Accept": "application/pdf,*/*"}
+    parsed = urlparse(url)
+    referer = f"{parsed.scheme}://{parsed.netloc}/" if parsed.scheme and parsed.netloc else ""
+    headers = {
+        **BROWSER_HEADERS,
+        "Accept": "application/pdf,application/octet-stream,*/*;q=0.8",
+    }
+    if referer:
+        headers["Referer"] = referer
     with httpx.Client(timeout=90.0, follow_redirects=True, headers=headers) as client:
         with client.stream("GET", url) as r:
             r.raise_for_status()
+            ctype = (r.headers.get("content-type") or "").lower()
             chunks = []
             size = 0
             for chunk in r.iter_bytes():
@@ -482,10 +661,47 @@ def download_pdf(url: str, dest_dir: Path, filename: str) -> Path:
                     raise RuntimeError("PDF maior que 40 MB; baixe manualmente e envie em Enviar PDFs.")
                 chunks.append(chunk)
     data = b"".join(chunks)
-    if not data.startswith(b"%PDF"):
+    if data.startswith(b"%PDF"):
+        dest.write_bytes(data)
+        return dest
+    # Às vezes o "PDF" é HTML de desafio anti-bot (SciELO/Bunny Shield)
+    if b"bunny-shield" in data[:4000].lower() or b"challenge" in data[:2000].lower():
+        raise RuntimeError(
+            "O site do PDF bloqueou o download automático (proteção anti-bot). "
+            "Abra o link no navegador, salve o PDF e use Enviar PDFs."
+        )
+    if "html" in ctype or data[:32].lstrip().lower().startswith((b"<!doctype", b"<html")):
         raise RuntimeError(
             "O link não devolveu um PDF (página HTML ou acesso restrito). "
             "Baixe o arquivo no site e use Enviar PDFs."
         )
-    dest.write_bytes(data)
-    return dest
+    raise RuntimeError(
+        "O link não devolveu um PDF (página HTML ou acesso restrito). "
+        "Baixe o arquivo no site e use Enviar PDFs."
+    )
+
+
+def download_first_working_pdf(
+    urls: list[str],
+    dest_dir: Path,
+    filename: str,
+) -> Path:
+    """Tenta cada URL candidata até obter um PDF válido."""
+    errors: list[str] = []
+    for url in urls:
+        if not url:
+            continue
+        try:
+            return download_pdf(url, dest_dir, filename)
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"{urlparse(url).hostname or url}: {exc}")
+            continue
+    if not urls:
+        raise RuntimeError(
+            "Sem PDF em acesso aberto. Baixe no SciELO/site da revista e use Enviar PDFs."
+        )
+    detail = errors[-1] if errors else "falha desconhecida"
+    raise RuntimeError(
+        f"Não foi possível baixar o PDF automaticamente ({detail}). "
+        "Baixe no site da revista e use Enviar PDFs."
+    )
