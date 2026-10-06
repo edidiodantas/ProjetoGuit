@@ -161,6 +161,42 @@ def init_session_state() -> None:
         st.session_state.search_note = ""
     if "last_answer" not in st.session_state:
         st.session_state.last_answer = None
+    if "pending_oa_index" not in st.session_state:
+        st.session_state.pending_oa_index = None
+    if "oa_index_feedback" not in st.session_state:
+        st.session_state.oa_index_feedback = None
+
+
+def _format_index_error(exc: BaseException) -> str:
+    msg = str(exc)
+    if "Is it empty" in msg or "Could not read document" in msg:
+        return (
+            "Não foi possível extrair texto desse PDF (provavelmente é scan/só imagem). "
+            "Use uma versão com texto selecionável, OCR, ou escolha outro artigo."
+        )
+    return msg
+
+
+def run_oa_index_job(hit_index: int) -> tuple[str | None, str | None]:
+    """Baixa PDF aberto e indexa. Retorna (nome_arquivo, mensagem_erro)."""
+    hits: list = st.session_state.search_hits
+    if hit_index < 0 or hit_index >= len(hits):
+        return None, "Resultado da busca inválido. Busque de novo."
+    hit = hits[hit_index]
+    fname = _safe_filename(hit.title, hit.year)
+    if fname in st.session_state.indexed_files:
+        return None, f"Já indexado: {fname}"
+    pdf_urls = resolve_pdf_candidates(hit, CONTACT_EMAIL)
+    if not pdf_urls:
+        return None, (
+            "Sem PDF em acesso aberto. "
+            "Baixe no SciELO/site da revista e use Enviar PDFs."
+        )
+    dest = download_first_working_pdf(pdf_urls, PDF_DIR, fname)
+    validate_pdf_has_extractable_text(dest)
+    run_async(index_pdf(dest, settings))
+    st.session_state.indexed_files.add(dest.name)
+    return dest.name, None
 
 
 async def index_pdf(path: Path, settings: Settings) -> None:
@@ -740,6 +776,34 @@ if search_clicked:
 
 hits: list = st.session_state.search_hits
 if hits:
+    if st.session_state.pending_oa_index is not None:
+        job_i = st.session_state.pending_oa_index
+        st.session_state.pending_oa_index = None
+        with st.spinner(
+            "Baixando PDF aberto e indexando com Ollama… "
+            "(pode levar alguns minutos; não feche a aba)"
+        ):
+            try:
+                indexed_name, err = run_oa_index_job(job_i)
+                if err:
+                    st.session_state.oa_index_feedback = ("error", err)
+                elif indexed_name:
+                    st.session_state.oa_index_feedback = ("success", indexed_name)
+            except Exception as exc:  # noqa: BLE001
+                st.session_state.oa_index_feedback = (
+                    "error",
+                    _format_index_error(exc),
+                )
+
+    feedback = st.session_state.oa_index_feedback
+    if feedback:
+        st.session_state.oa_index_feedback = None
+        kind, payload = feedback
+        if kind == "success":
+            st.success(f"Indexado na sessão: **{payload}**")
+        else:
+            st.error(payload)
+
     note = st.session_state.get("search_note") or "catálogo público"
     n_oa = sum(1 for h in hits if h.has_open_pdf)
     st.write(f"{len(hits)} resultado(s) via {note} · {n_oa} com PDF aberto:")
@@ -767,36 +831,14 @@ if hits:
             if st.button(
                 "Baixar PDF aberto e indexar",
                 key=btn_key,
-                disabled=not can_index,
+                disabled=not can_index or st.session_state.pending_oa_index is not None,
             ):
                 fname = _safe_filename(hit.title, hit.year)
                 if fname in st.session_state.indexed_files:
                     st.info(f"Já indexado: {fname}")
                 else:
-                    indexed_name: str | None = None
-                    with st.status(f"Obtendo `{fname}`…", expanded=True) as status:
-                        try:
-                            st.write("Resolvendo link de PDF aberto…")
-                            pdf_urls = resolve_pdf_candidates(hit, CONTACT_EMAIL)
-                            if not pdf_urls:
-                                raise RuntimeError(
-                                    "Sem PDF em acesso aberto. "
-                                    "Baixe no SciELO/site da revista e use Enviar PDFs."
-                                )
-                            st.write(f"Baixando ({len(pdf_urls)} link(s) candidato(s))…")
-                            dest = download_first_working_pdf(pdf_urls, PDF_DIR, fname)
-                            st.write("Indexando com Ollama (pode demorar)…")
-                            run_async(index_pdf(dest, settings))
-                            st.session_state.indexed_files.add(dest.name)
-                            indexed_name = dest.name
-                            status.update(
-                                label=f"Indexado: {dest.name}", state="complete"
-                            )
-                        except Exception as exc:  # noqa: BLE001
-                            status.update(label="Não foi possível indexar", state="error")
-                            st.error(str(exc))
-                    if indexed_name:
-                        st.success(f"Indexado na sessão: **{indexed_name}**")
+                    st.session_state.pending_oa_index = i
+                    st.rerun()
 elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
 
