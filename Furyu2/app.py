@@ -209,7 +209,7 @@ _MARK_PNG_B64 = base64.b64encode(
 ).decode("ascii")
 MARK_IMG = (
     f'<img class="furyu-mark" src="data:image/png;base64,{_MARK_PNG_B64}" '
-    f'width="124" height="70" alt="Furyu — livro aberto deitado com páginas coloridas" />'
+    f'width="118" height="88" alt="Furyu — livro aberto em leque com páginas coloridas" />'
 )
 
 _UBUNTU_CSS = (ROOT / "assets" / "fonts.css").read_text(encoding="utf-8")
@@ -374,12 +374,12 @@ st.html(
     }}
     .brand-wrap .furyu-mark {{
         flex-shrink: 0;
-        width: 124px;
-        height: 70px;
+        width: 118px;
+        height: 88px;
         display: block;
         object-fit: contain;
-        transform-origin: 50% 70%;
-        filter: drop-shadow(0 10px 18px rgba(11, 79, 108, 0.22));
+        transform-origin: 50% 80%;
+        filter: drop-shadow(0 8px 16px rgba(90, 74, 138, 0.22));
         animation: furyu-mark-float 5s ease-in-out infinite;
     }}
     @keyframes furyu-mark-float {{
