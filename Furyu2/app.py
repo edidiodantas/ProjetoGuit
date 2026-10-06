@@ -36,6 +36,7 @@ from academic_search import (
     download_first_working_pdf,
     resolve_pdf_candidates,
     search_academic,
+    validate_pdf_has_extractable_text,
     _safe_filename,
 )
 
@@ -163,7 +164,17 @@ def init_session_state() -> None:
 
 
 async def index_pdf(path: Path, settings: Settings) -> None:
-    await st.session_state.docs.aadd(str(path), settings=settings)
+    validate_pdf_has_extractable_text(path)
+    try:
+        await st.session_state.docs.aadd(str(path), settings=settings)
+    except ValueError as exc:
+        msg = str(exc)
+        if "Is it empty" in msg or "Could not read document" in msg:
+            raise RuntimeError(
+                f"Não foi possível extrair texto de «{path.name}». "
+                "Se for PDF escaneado (só imagem), use OCR ou outro arquivo."
+            ) from exc
+        raise
 
 
 async def ask_question(question: str, settings: Settings):
@@ -778,10 +789,11 @@ if hits:
                             status.update(
                                 label=f"Indexado: {dest.name}", state="complete"
                             )
-                            st.rerun()
                         except Exception as exc:  # noqa: BLE001
                             status.update(label="Não foi possível indexar", state="error")
                             st.error(str(exc))
+                    else:
+                        st.success(f"Indexado na sessão: **{dest.name}**")
 elif search_clicked and search_q.strip():
     st.info("Nenhum artigo encontrado. Tente outras palavras.")
 

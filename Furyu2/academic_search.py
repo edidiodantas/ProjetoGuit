@@ -636,6 +636,32 @@ def _safe_filename(title: str, year: int | None) -> str:
     return f"{slug}{y}.pdf"
 
 
+def pdf_extractable_char_count(path: Path) -> int:
+    """Quantidade de texto selecionável no PDF (0 = scan só imagem)."""
+    try:
+        import pymupdf
+
+        doc = pymupdf.open(path)
+        try:
+            return sum(len(page.get_text()) for page in doc)
+        finally:
+            doc.close()
+    except Exception:
+        return -1
+
+
+def validate_pdf_has_extractable_text(path: Path, *, min_chars: int = 40) -> None:
+    """PaperQA precisa de texto; PDFs só imagem falham com 'Is it empty?'."""
+    count = pdf_extractable_char_count(path)
+    if count < 0:
+        raise RuntimeError(f"Não foi possível abrir o PDF: {path.name}")
+    if count < min_chars:
+        raise RuntimeError(
+            f"O PDF «{path.name}» não tem texto selecionável (provavelmente é scan/só imagem). "
+            "Baixe uma versão com texto ou use OCR e envie em Enviar PDFs."
+        )
+
+
 def download_pdf(url: str, dest_dir: Path, filename: str) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     dest = dest_dir / filename
@@ -663,6 +689,11 @@ def download_pdf(url: str, dest_dir: Path, filename: str) -> Path:
     data = b"".join(chunks)
     if data.startswith(b"%PDF"):
         dest.write_bytes(data)
+        try:
+            validate_pdf_has_extractable_text(dest)
+        except RuntimeError:
+            dest.unlink(missing_ok=True)
+            raise
         return dest
     # Às vezes o "PDF" é HTML de desafio anti-bot (SciELO/Bunny Shield)
     if b"bunny-shield" in data[:4000].lower() or b"challenge" in data[:2000].lower():
