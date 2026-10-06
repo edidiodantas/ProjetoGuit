@@ -9,8 +9,11 @@ Não baixa artigo fechado (paywall).
 
 from __future__ import annotations
 
+import ipaddress
 import re
+import socket
 import time
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
 from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import quote, urljoin, urlparse
@@ -48,6 +51,21 @@ BROWSER_HEADERS = {
     "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7",
 }
 
+# Limites de segurança (anti-SSRF / DoS)
+MAX_PDF_BYTES = 40 * 1024 * 1024
+MAX_PDF_PAGES_SCAN = 80
+PDF_OPEN_TIMEOUT_SEC = 12.0
+MAX_HTTP_REDIRECTS = 8
+_BLOCKED_HOSTS = frozenset(
+    {
+        "localhost",
+        "localhost.localdomain",
+        "metadata.google.internal",
+        "metadata.goog",
+        "0.0.0.0",
+    }
+)
+
 
 @dataclass
 class PaperHit:
@@ -74,6 +92,81 @@ class PaperHit:
             if u and u not in ordered:
                 ordered.append(u)
         return ordered
+
+
+def _ip_is_public(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """True só para IPs roteáveis públicos (bloqueia loopback/privado/link-local)."""
+    return bool(ip.is_global)
+
+
+def _host_is_blocked_name(host: str) -> bool:
+    h = host.lower().rstrip(".")
+    if not h or h in _BLOCKED_HOSTS:
+        return True
+    if h.endswith(".localhost") or h.endswith(".local") or h.endswith(".internal"):
+        return True
+    if h.endswith(".lan") or h.endswith(".home") or h.endswith(".corp"):
+        return True
+    return False
+
+
+def is_safe_public_url(url: str, *, resolve_dns: bool = True) -> bool:
+    """Permite só http(s) para hosts públicos — mitiga SSRF (localhost/LAN/metadata)."""
+    raw = (url or "").strip()
+    if not raw or len(raw) > 2048:
+        return False
+    try:
+        parsed = urlparse(raw)
+    except Exception:
+        return False
+    if parsed.scheme not in ("http", "https"):
+        return False
+    if parsed.username or parsed.password:
+        return False
+    host = (parsed.hostname or "").strip().lower()
+    if _host_is_blocked_name(host):
+        return False
+    try:
+        ip = ipaddress.ip_address(host)
+        return _ip_is_public(ip)
+    except ValueError:
+        pass
+    if not resolve_dns:
+        return "." in host
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except OSError:
+        return False
+    if not infos:
+        return False
+    for info in infos:
+        addr = info[4][0]
+        try:
+            ip = ipaddress.ip_address(addr)
+        except ValueError:
+            return False
+        if not _ip_is_public(ip):
+            return False
+    return True
+
+
+def assert_safe_fetch_url(url: str, *, resolve_dns: bool = True) -> str:
+    """Valida URL antes de qualquer GET; devolve a URL limpa ou levanta RuntimeError."""
+    cleaned = (url or "").strip()
+    if not is_safe_public_url(cleaned, resolve_dns=resolve_dns):
+        raise RuntimeError(
+            "URL bloqueada por segurança (só http(s) público; "
+            "localhost, LAN e metadata cloud são proibidos)."
+        )
+    return cleaned
+
+
+def sanitize_open_url(url: str) -> str:
+    """URL segura para guardar/exibir (sem DNS — só esquema, host e IPs literais)."""
+    raw = (url or "").strip()
+    if is_safe_public_url(raw, resolve_dns=False):
+        return raw
+    return ""
 
 
 def _headers(s2_key: str = "") -> dict[str, str]:
@@ -193,15 +286,33 @@ def scrape_landing_pdf_url(landing_url: str, *, client: httpx.Client | None = No
     landing_url = (landing_url or "").strip()
     if not landing_url.startswith("http"):
         return ""
+    try:
+        assert_safe_fetch_url(landing_url)
+    except RuntimeError:
+        return ""
     own = client is None
     if own:
-        client = httpx.Client(timeout=25.0, follow_redirects=True, headers=BROWSER_HEADERS)
+        client = httpx.Client(timeout=25.0, follow_redirects=False, headers=BROWSER_HEADERS)
     try:
-        r = client.get(landing_url)
-        if r.status_code >= 400:
+        current = landing_url
+        html = ""
+        base = current
+        for _ in range(MAX_HTTP_REDIRECTS):
+            assert_safe_fetch_url(current)
+            r = client.get(current)
+            if r.status_code in (301, 302, 303, 307, 308):
+                loc = (r.headers.get("location") or "").strip()
+                if not loc:
+                    return ""
+                current = urljoin(str(r.url), loc)
+                continue
+            if r.status_code >= 400:
+                return ""
+            html = r.text or ""
+            base = str(r.url)
+            break
+        else:
             return ""
-        html = r.text or ""
-        base = str(r.url)
         cands: list[str] = []
         for m in _PDF_HREF_RE.finditer(html):
             cands.append(urljoin(base, m.group(1).strip()))
@@ -221,7 +332,12 @@ def scrape_landing_pdf_url(landing_url: str, *, client: httpx.Client | None = No
         ):
             cands.append(urljoin(base, m.group(1).strip()))
         ranked = _prefer_direct_pdf(
-            [c for c in cands if _looks_like_pdf_url(c) or "/article/download/" in c.lower()]
+            [
+                c
+                for c in cands
+                if (_looks_like_pdf_url(c) or "/article/download/" in c.lower())
+                and is_safe_public_url(c, resolve_dns=False)
+            ]
         )
         return ranked[0] if ranked else ""
     except Exception:
@@ -365,7 +481,7 @@ def search_oasisbr(query: str, *, limit: int = 8) -> list[PaperHit]:
             landings_to_scrape.append((hit, landing_url))
 
     if landings_to_scrape:
-        with httpx.Client(timeout=25.0, follow_redirects=True, headers=BROWSER_HEADERS) as client:
+        with httpx.Client(timeout=25.0, follow_redirects=False, headers=BROWSER_HEADERS) as client:
             for hit, landing in landings_to_scrape[:12]:
                 scraped = scrape_landing_pdf_url(landing, client=client)
                 if scraped:
@@ -610,9 +726,10 @@ def resolve_pdf_url(hit: PaperHit, contact_email: str) -> str:
 def best_open_url(hit: PaperHit) -> str:
     """Melhor URL já conhecida no hit (PDF direto, landing OJS ou DOI) — sem rede."""
     for url in hit.all_pdf_candidates():
-        if url:
-            return url
-    landing = (hit.landing_url or "").strip()
+        safe = sanitize_open_url(url)
+        if safe:
+            return safe
+    landing = sanitize_open_url(hit.landing_url or "")
     if landing:
         return landing
     doi = (hit.doi or "").strip()
@@ -623,14 +740,16 @@ def best_open_url(hit: PaperHit) -> str:
 
 def resolve_pdf_candidates(hit: PaperHit, contact_email: str) -> list[str]:
     """Lista ordenada de URLs candidatas a PDF aberto."""
-    found: list[str] = list(hit.all_pdf_candidates())
+    found: list[str] = [
+        u for u in hit.all_pdf_candidates() if is_safe_public_url(u, resolve_dns=False)
+    ]
     if hit.landing_url:
         scraped = scrape_landing_pdf_url(hit.landing_url)
         if scraped and scraped not in found:
             found.insert(0, scraped)
     if hit.doi:
         for u in unpaywall_pdf_urls(hit.doi, contact_email):
-            if u not in found:
+            if u not in found and is_safe_public_url(u, resolve_dns=False):
                 found.append(u)
     pid = _scielo_pid(hit.doi or "", hit.paper_id, hit.landing_url or "")
     if pid:
@@ -647,25 +766,58 @@ def _safe_filename(title: str, year: int | None) -> str:
     return f"{slug}{y}.pdf"
 
 
+def _pdf_char_count_sync(path: Path) -> int:
+    import pymupdf
+
+    doc = pymupdf.open(path)
+    try:
+        total = 0
+        for i, page in enumerate(doc):
+            if i >= MAX_PDF_PAGES_SCAN:
+                break
+            total += len(page.get_text())
+        return total
+    finally:
+        doc.close()
+
+
 def pdf_extractable_char_count(path: Path) -> int:
     """Quantidade de texto selecionável no PDF (0 = scan só imagem)."""
     try:
-        import pymupdf
-
-        doc = pymupdf.open(path)
-        try:
-            return sum(len(page.get_text()) for page in doc)
-        finally:
-            doc.close()
+        if not path.is_file():
+            return -1
+        size = path.stat().st_size
+        if size <= 0 or size > MAX_PDF_BYTES:
+            return -1
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            fut = pool.submit(_pdf_char_count_sync, path)
+            try:
+                return int(fut.result(timeout=PDF_OPEN_TIMEOUT_SEC))
+            except FuturesTimeout:
+                return -1
     except Exception:
         return -1
 
 
 def validate_pdf_has_extractable_text(path: Path, *, min_chars: int = 40) -> None:
     """PaperQA precisa de texto; PDFs só imagem falham com 'Is it empty?'."""
+    try:
+        size = path.stat().st_size if path.is_file() else -1
+    except OSError:
+        size = -1
+    if size < 0:
+        raise RuntimeError(f"Não foi possível abrir o PDF: {path.name}")
+    if size > MAX_PDF_BYTES:
+        raise RuntimeError(
+            f"O PDF «{path.name}» excede {MAX_PDF_BYTES // (1024 * 1024)} MB. "
+            "Use um arquivo menor."
+        )
     count = pdf_extractable_char_count(path)
     if count < 0:
-        raise RuntimeError(f"Não foi possível abrir o PDF: {path.name}")
+        raise RuntimeError(
+            f"Não foi possível abrir o PDF: {path.name} "
+            "(arquivo inválido, timeout ou protegido)."
+        )
     if count < min_chars:
         raise RuntimeError(
             f"O PDF «{path.name}» não tem texto selecionável (provavelmente é scan/só imagem). "
@@ -678,26 +830,40 @@ def download_pdf(url: str, dest_dir: Path, filename: str) -> Path:
     dest = dest_dir / filename
     if dest.exists():
         dest = dest_dir / f"{dest.stem}_novo{dest.suffix}"
-    parsed = urlparse(url)
-    referer = f"{parsed.scheme}://{parsed.netloc}/" if parsed.scheme and parsed.netloc else ""
+    current = assert_safe_fetch_url(url)
+    parsed = urlparse(current)
     headers = {
         **BROWSER_HEADERS,
         "Accept": "application/pdf,application/octet-stream,*/*;q=0.8",
+        "Referer": f"{parsed.scheme}://{parsed.netloc}/",
     }
-    if referer:
-        headers["Referer"] = referer
-    with httpx.Client(timeout=90.0, follow_redirects=True, headers=headers) as client:
-        with client.stream("GET", url) as r:
-            r.raise_for_status()
-            ctype = (r.headers.get("content-type") or "").lower()
-            chunks = []
-            size = 0
-            for chunk in r.iter_bytes():
-                size += len(chunk)
-                if size > 40 * 1024 * 1024:
-                    raise RuntimeError("PDF maior que 40 MB; baixe manualmente e envie em Enviar PDFs.")
-                chunks.append(chunk)
-    data = b"".join(chunks)
+    data = b""
+    ctype = ""
+    with httpx.Client(timeout=90.0, follow_redirects=False, headers=headers) as client:
+        for _ in range(MAX_HTTP_REDIRECTS):
+            assert_safe_fetch_url(current)
+            with client.stream("GET", current) as r:
+                if r.status_code in (301, 302, 303, 307, 308):
+                    loc = (r.headers.get("location") or "").strip()
+                    if not loc:
+                        raise RuntimeError("Redirect sem Location; baixe manualmente.")
+                    current = urljoin(str(r.url), loc)
+                    continue
+                r.raise_for_status()
+                ctype = (r.headers.get("content-type") or "").lower()
+                chunks: list[bytes] = []
+                size = 0
+                for chunk in r.iter_bytes():
+                    size += len(chunk)
+                    if size > MAX_PDF_BYTES:
+                        raise RuntimeError(
+                            "PDF maior que 40 MB; baixe manualmente e envie em Enviar PDFs."
+                        )
+                    chunks.append(chunk)
+                data = b"".join(chunks)
+            break
+        else:
+            raise RuntimeError("Muitos redirects no link do PDF; baixe manualmente.")
     if data.startswith(b"%PDF"):
         dest.write_bytes(data)
         try:

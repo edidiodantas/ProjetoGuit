@@ -1,12 +1,33 @@
 from __future__ import annotations
 
 import sys
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+
+import academic_search as ac
+
+# Função original (antes do autouse relaxar DNS nos testes de rede)
+_REAL_IS_SAFE_PUBLIC_URL = ac.is_safe_public_url
+
+
+@pytest.fixture(autouse=True)
+def _relax_ssrf_dns_for_unit_tests(
+    monkeypatch: pytest.MonkeyPatch, request: pytest.FixtureRequest
+):
+    """Evita getaddrinfo em hosts fictícios (rev.org, etc.) nos testes de rede.
+
+    Testes marcados com @pytest.mark.ssrf_dns usam a validação completa.
+    """
+    if request.node.get_closest_marker("ssrf_dns"):
+        return
+
+    def _safe(url: str, *, resolve_dns: bool = True) -> bool:
+        return _REAL_IS_SAFE_PUBLIC_URL(url, resolve_dns=False)
+
+    monkeypatch.setattr(ac, "is_safe_public_url", _safe)
 
 
 @pytest.fixture

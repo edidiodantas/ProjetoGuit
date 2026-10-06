@@ -22,6 +22,7 @@ class _Resp:
         self._json = json_data or {}
         self.text = text
         self.url = url
+        self.headers: dict[str, str] = {}
 
     def json(self) -> dict:
         return self._json

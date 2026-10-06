@@ -33,9 +33,11 @@ from paperqa.settings import (
 )
 
 from academic_search import (
+    MAX_PDF_BYTES,
     best_open_url,
     download_first_working_pdf,
     resolve_pdf_candidates,
+    sanitize_open_url,
     search_academic,
     validate_pdf_has_extractable_text,
     _safe_filename,
@@ -226,7 +228,7 @@ def save_saved_links(items: list[dict]) -> None:
 
 def add_saved_link(*, title: str, url: str, doi: str = "", source: str = "") -> bool:
     """Guarda link para baixar depois. True se novo; False se já existia."""
-    url = (url or "").strip()
+    url = sanitize_open_url(url)
     if not url:
         return False
     items = load_saved_links()
@@ -238,10 +240,10 @@ def add_saved_link(*, title: str, url: str, doi: str = "", source: str = "") -> 
     items.insert(
         0,
         {
-            "title": (title or "Sem título").strip(),
+            "title": (title or "Sem título").strip()[:300],
             "url": url,
-            "doi": (doi or "").strip(),
-            "source": (source or "").strip(),
+            "doi": (doi or "").strip()[:200],
+            "source": (source or "").strip()[:80],
             "saved_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
         },
     )
@@ -777,7 +779,10 @@ uploaded = st.file_uploader(
     "Selecione um ou mais PDFs",
     type=["pdf"],
     accept_multiple_files=True,
-    help="Apenas arquivos PDF. Cada um é lido e indexado nesta sessão.",
+    help=(
+        f"Apenas PDF com texto selecionável, até {MAX_PDF_BYTES // (1024 * 1024)} MB cada. "
+        "Não indexe PDFs de fontes não confiáveis (podem influenciar as respostas)."
+    ),
 )
 
 if uploaded:
@@ -786,7 +791,17 @@ if uploaded:
         if f.name in st.session_state.indexed_files:
             st.info(f"Já indexado: {f.name}")
             continue
-        dest.write_bytes(f.getbuffer())
+        raw = f.getbuffer()
+        if len(raw) > MAX_PDF_BYTES:
+            st.error(
+                f"`{f.name}` excede {MAX_PDF_BYTES // (1024 * 1024)} MB — "
+                "envie um arquivo menor."
+            )
+            continue
+        if len(raw) < 8 or bytes(raw[:4]) != b"%PDF":
+            st.error(f"`{f.name}` não parece um PDF válido.")
+            continue
+        dest.write_bytes(raw)
         with st.status(
             f"Indexando `{f.name}` com Ollama + embeddings locais… "
             "(pode demorar)",
@@ -999,11 +1014,15 @@ elif search_clicked and search_q.strip():
 # --- Pergunta ---
 # Título via HTML próprio (sem link/ícone do Streamlit, que às vezes vira "r" fantasma)
 st.html('<div class="app-section-title">3. Pergunta</div>')
-st.caption("Exemplo: Quais são as principais conclusões do artigo?")
+st.caption(
+    "Exemplo: Quais são as principais conclusões do artigo? "
+    "Respostas usam só os PDFs indexados — trate conteúdo de fontes desconhecidas com cautela."
+)
 question = st.text_input(
     "Digite sua pergunta sobre os documentos",
     placeholder="Escreva sua pergunta aqui…",
     key="pergunta_texto",
+    max_chars=2000,
 )
 ask_clicked = st.button(
     "Perguntar",

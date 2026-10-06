@@ -160,9 +160,9 @@ def test_best_open_url_empty() -> None:
 
 def test_resolve_pdf_candidates_unpaywall_merge() -> None:
     hit = ac.PaperHit("1", "T", None, "", "", "10.1/x", "", "", "x")
-    with patch.object(ac, "unpaywall_pdf_urls", return_value=["https://ojs/dl.pdf"]):
+    with patch.object(ac, "unpaywall_pdf_urls", return_value=["https://ojs.example.org/dl.pdf"]):
         c = ac.resolve_pdf_candidates(hit, "a@b.com")
-    assert any("ojs" in u for u in c)
+    assert any("ojs.example.org" in u for u in c)
 
 
 def test_download_non_pdf_final_raise(tmp_path: Path) -> None:
