@@ -1,0 +1,254 @@
+================================================================================
+  FURYU2 — INSTALAÇÃO NO UBUNTU LTS (para imprimir / acompanhar)
+  Versão: pasta Furyu2 · Python 3.11+ · Ollama local · Streamlit
+================================================================================
+
+Imprima este arquivo ou deixe aberto no celular enquanto instala.
+Marque cada passo com [x] quando terminar.
+
+--------------------------------------------------------------------------------
+ANTES DE COMEÇAR
+--------------------------------------------------------------------------------
+
+[ ] Tenho Ubuntu 22.04 LTS ou 24.04 LTS
+[ ] Tenho internet (só na instalação e na busca de artigos)
+[ ] Tenho o pendrive com a pasta Furyu2  OU  acesso ao GitHub
+[ ] Vou instalar no DISCO INTERNO (ex.: ~/Furyu2), NÃO no pendrive exFAT
+
+NÃO rode o programa de dentro do pendrive (exFAT quebra o .venv).
+
+
+--------------------------------------------------------------------------------
+PASSO A — COPIAR A PASTA PARA O PC
+--------------------------------------------------------------------------------
+
+Opção 1 · Pendrive
+  [ ] Plugue o pendrive
+  [ ] Abra o Terminal e rode (ajuste o nome do pendrive se precisar):
+
+      ls /media/$USER/
+      cp -a /media/$USER/*/Furyu2 ~/Furyu2
+      cd ~/Furyu2
+      ls
+
+  [ ] Confira se existem: app.py  install-ubuntu.sh  rodar-ubuntu.sh
+                          requirements.txt  INSTALAR-UBUNTU-LTS.txt
+
+Opção 2 · Arquivo .tar.gz no pendrive
+  [ ] No PC atual, se tiver a pasta Furyu2:
+
+      cd ~/Furyu2   # ou onde estiver a pasta
+      bash empacotar-para-pendrive.sh
+      # copie Furyu2-ubuntu-pendrive.tar.gz para o pendrive
+
+  [ ] No PC novo Ubuntu:
+
+      tar -xzf /media/$USER/*/Furyu2-ubuntu-pendrive.tar.gz -C ~
+      cd ~/Furyu2
+      ls
+
+
+Opção 3 · Git (se não tiver pendrive)
+  [ ] No Terminal:
+
+      cd ~
+      git clone https://github.com/edidiodantas/ProjetoGuit.git
+      cd ProjetoGuit
+      git checkout cursor/furyu2-ubuntu-1878
+      cp -a Furyu2 ~/Furyu2
+      cd ~/Furyu2
+
+
+--------------------------------------------------------------------------------
+PASSO B — PACOTES DO SISTEMA
+--------------------------------------------------------------------------------
+
+  [ ] Rode:
+
+      sudo apt update
+      sudo apt install -y python3 python3-venv python3-pip python3-dev \
+                          build-essential curl git
+
+  [ ] Confira a versão do Python:
+
+      python3 --version
+
+  [ ] Precisa ser 3.11 ou superior.
+      Se for 3.10 (comum no Ubuntu 22.04), instale 3.12:
+
+      sudo apt install -y software-properties-common
+      sudo add-apt-repository -y ppa:deadsnakes/ppa
+      sudo apt update
+      sudo apt install -y python3.12 python3.12-venv python3.12-dev
+
+
+--------------------------------------------------------------------------------
+PASSO C — OLLAMA (IA LOCAL)
+--------------------------------------------------------------------------------
+
+  [ ] Instale o Ollama:
+
+      curl -fsSL https://ollama.com/install.sh | sh
+
+  [ ] Baixe o modelo (4b é bom para começar; 2b se o PC for fraco):
+
+      ollama pull qwen3.5:4b
+
+  [ ] Teste:
+
+      ollama run qwen3.5:4b "Olá, responda em uma frase."
+
+  [ ] Ollama deve responder em http://localhost:11434
+      NÃO configure OPENAI_API_KEY.
+
+
+--------------------------------------------------------------------------------
+PASSO D — INSTALAR O FURYU
+--------------------------------------------------------------------------------
+
+  [ ] Na pasta ~/Furyu2:
+
+      cd ~/Furyu2
+      bash install-ubuntu.sh
+
+      (A 1ª vez demora: PyTorch + PaperQA + Streamlit.)
+
+  [ ] Edite o e-mail de contato (Unpaywall — NÃO é login):
+
+      nano .env
+
+      Coloque, por exemplo:
+        OLLAMA_MODEL=qwen3.5:4b
+        CONTACT_EMAIL=seu.email@escola.edu.br
+
+      Salve: Ctrl+O Enter · Saia: Ctrl+X
+
+
+--------------------------------------------------------------------------------
+PASSO E — ABRIR O PROGRAMA
+--------------------------------------------------------------------------------
+
+  [ ] Rode:
+
+      cd ~/Furyu2
+      bash rodar-ubuntu.sh
+
+  [ ] No navegador abra:  http://localhost:8501
+  [ ] Confira: título Furyu + ícone de livro simples
+  [ ] Faixa verde no topo: Ollama ok · modelo encontrado
+
+
+--------------------------------------------------------------------------------
+PASSO F — TESTE RÁPIDO (acompanhamento)
+--------------------------------------------------------------------------------
+
+  [ ] 1. Enviar PDFs — envie um PDF curto com texto (não scan)
+  [ ] 2. Buscar artigos — tema: educacao ambiental · Buscar
+  [ ] Em cada resultado você verá:
+        · Abrir link
+        · Guardar link   (salva em documentos/links_salvos.json)
+        · Baixar e indexar
+  [ ] Se "Baixar e indexar" falhar (SciELO/scan): use Abrir link,
+      baixe o PDF no navegador e use Enviar PDFs
+  [ ] 3. Pergunta — faça uma pergunta e aguarde (1ª vez pode demorar)
+  [ ] Abra "Mostrar fontes"
+
+
+--------------------------------------------------------------------------------
+PASSO G — VALIDAR TESTES AUTOMÁTICOS (opcional, recomendado)
+--------------------------------------------------------------------------------
+
+  [ ] Unitários (módulo de busca acadêmica):
+
+      cd ~/Furyu2
+      source .venv/bin/activate
+      pip install -r requirements-dev.txt
+      pytest
+
+      Esperado: 58 passed · cobertura 100% em academic_search.py
+
+  [ ] Avaliação RAG (retrieval + faithfulness + edge cases):
+
+      pip install -r testes/requirements-avaliacao.txt
+      python testes/run_avaliacao.py
+
+      Esperado: 6 passed (1 skipped = juiz DeepEval opcional)
+
+  [ ] Checklist visual: abra CHECKLIST-QA-UI.md
+
+
+--------------------------------------------------------------------------------
+COMANDOS ÚTEIS (cola rápida)
+--------------------------------------------------------------------------------
+
+  # Instalar tudo de novo (se precisar)
+  cd ~/Furyu2 && bash install-ubuntu.sh
+
+  # Rodar
+  cd ~/Furyu2 && bash rodar-ubuntu.sh
+
+  # Parar o app
+  Ctrl+C no terminal
+
+  # Ver se Ollama está no ar
+  curl -s http://localhost:11434/api/tags | head
+
+  # Baixar outro modelo (mais leve)
+  ollama pull qwen3.5:2b
+  # depois edite OLLAMA_MODEL=qwen3.5:2b no .env
+
+
+--------------------------------------------------------------------------------
+PROBLEMAS COMUNS
+--------------------------------------------------------------------------------
+
+  python3: No module named venv
+    → sudo apt install -y python3-venv
+
+  Connection refused :11434
+    → ollama serve   (ou abra o app Ollama)
+
+  Modelo não encontrado
+    → ollama pull qwen3.5:4b
+
+  install-ubuntu.sh recusa pendrive exFAT
+    → copie Furyu2 para ~/Furyu2 e rode LÁ
+
+  Porta 8501 ocupada
+    → source .venv/bin/activate
+      streamlit run app.py --server.port 8502
+
+  PDF "vazio" / scan
+    → use PDF com texto selecionável ou Abrir/Guardar link
+
+
+--------------------------------------------------------------------------------
+O QUE LEVAR DE VOLTA NO PENDRIVE
+--------------------------------------------------------------------------------
+
+  [ ] Feche o Streamlit (Ctrl+C)
+  [ ] NÃO precisa copiar .venv (é grande e específico do PC)
+  [ ] Opcional: copie documentos/ (PDFs) e links_salvos.json
+  [ ] A pasta Furyu2 SEM .venv já basta para instalar em outro PC
+
+
+--------------------------------------------------------------------------------
+ARQUIVOS IMPORTANTES NESTA PASTA
+--------------------------------------------------------------------------------
+
+  LEIA-ME-PENDRIVE.txt       — visão geral do pendrive
+  INSTALAR-UBUNTU-LTS.txt    — ESTE guia (imprimir)
+  INSTALAR-UBUNTU.md         — mesma instalação (formato Markdown)
+  install-ubuntu.sh          — instalador automático
+  rodar-ubuntu.sh            — abre a interface
+  app.py / academic_search.py
+  FUNCOES.txt
+  README.md
+
+  GitHub: https://github.com/edidiodantas/ProjetoGuit
+  Branch: cursor/furyu2-ubuntu-1878
+
+
+================================================================================
+  Fim do guia — bom uso do Furyu!
+================================================================================

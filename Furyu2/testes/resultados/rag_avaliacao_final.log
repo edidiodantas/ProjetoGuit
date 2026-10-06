@@ -1,0 +1,40 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.6.0 -- /workspace/Furyu2/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /workspace/Furyu2/testes
+configfile: pytest.ini
+plugins: deepeval-4.2.8, rerunfailures-16.7, cov-7.1.0, repeat-0.9.4, mock-3.16.0, langsmith-0.14.4, asyncio-1.4.0, xdist-3.8.0, anyio-4.15.1
+asyncio: mode=Mode.STRICT, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 7 items
+
+testes/test_01_retrieval.py::test_retrieval_context_relevance_and_recall PASSED [ 14%]
+testes/test_01_retrieval.py::test_retrieval_metrics_unit_offline PASSED  [ 28%]
+testes/test_02_generation.py::test_generation_faithfulness_and_answer_relevance PASSED [ 42%]
+testes/test_02_generation.py::test_generation_metrics_unit_offline PASSED [ 57%]
+testes/test_02_generation.py::test_deepeval_faithfulness_judge SKIPPED   [ 71%]
+testes/test_03_edge_cases.py::test_five_edge_cases PASSED                [ 85%]
+testes/test_03_edge_cases.py::test_edge_case_definitions_present PASSED  [100%]Running teardown with pytest sessionfinish...
+
+Test test_02_generation.py::test_deepeval_faithfulness_judge was skipped. 
+Reason: ('/workspace/Furyu2/testes/test_02_generation.py', 70, 'Skipped: Juiz 
+LLM DeepEval desativado ou Ollama ausente')
+
+=================== 6 passed, 1 skipped in 65.98s (0:01:05) ====================
+>> /workspace/Furyu2/.venv/bin/python -m pytest /workspace/Furyu2/testes -c /workspace/Furyu2/testes/pytest.ini -v --tb=short
+# Relatório RAG Furyu
+
+- Gerado em: `2026-10-06T17:41:26.911118+00:00`
+- pytest exit: **0** (PASS)
+
+## Pilares
+
+1. Retrieval — Context Relevance / Recall
+2. Geração — Faithfulness / Answer Relevance
+3. Edge cases — fora de escopo, conflito, injeção pergunta/doc, corpus vazio
+
+## Arquivos
+
+- `retrieval_report.json`
+- `generation_report.json`
+- `edge_cases_report.json`
+

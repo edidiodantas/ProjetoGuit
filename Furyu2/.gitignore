@@ -1,0 +1,14 @@
+.venv/
+.pqa/
+__pycache__/
+*.pyc
+.env
+documentos/*.pdf
+documentos/links_salvos.json
+linux-env/
+linux-env.img
+.streamlit/secrets.toml
+
+# Pacotes gerados para pendrive (não versionar)
+Furyu2-ubuntu-pendrive*.tar.gz
+.coverage
