@@ -209,7 +209,7 @@ _MARK_PNG_B64 = base64.b64encode(
 ).decode("ascii")
 MARK_IMG = (
     f'<img class="furyu-mark" src="data:image/png;base64,{_MARK_PNG_B64}" '
-    f'width="88" height="88" alt="Furyu — livro aberto com páginas coloridas" />'
+    f'width="124" height="70" alt="Furyu — livro aberto deitado com páginas coloridas" />'
 )
 
 _UBUNTU_CSS = (ROOT / "assets" / "fonts.css").read_text(encoding="utf-8")
@@ -369,48 +369,58 @@ st.html(
     .brand-wrap {{
         display: flex;
         align-items: center;
-        gap: 1.1rem;
+        gap: 1.15rem;
         margin: 0.2rem 0 0.35rem 0;
     }}
     .brand-wrap .furyu-mark {{
         flex-shrink: 0;
-        width: 88px;
-        height: 88px;
+        width: 124px;
+        height: 70px;
         display: block;
         object-fit: contain;
-        transform-origin: 50% 80%;
-        /* leve inclinação para revelar um pouco mais as páginas coloridas */
-        filter: drop-shadow(0 8px 16px rgba(11, 79, 108, 0.2));
-        animation: furyu-mark-float 4.8s ease-in-out infinite;
+        transform-origin: 50% 70%;
+        filter: drop-shadow(0 10px 18px rgba(11, 79, 108, 0.22));
+        animation: furyu-mark-float 5s ease-in-out infinite;
     }}
     @keyframes furyu-mark-float {{
-        0%, 100% {{ transform: rotate(-7deg) translateY(0); }}
-        50% {{ transform: rotate(-9deg) translateY(-4px); }}
+        0%, 100% {{ transform: translateY(0); }}
+        50% {{ transform: translateY(-4px); }}
     }}
     @media (prefers-reduced-motion: reduce) {{
         .brand-wrap .furyu-mark {{
             animation: none !important;
-            transform: rotate(-7deg) !important;
+            transform: none !important;
         }}
     }}
     .brand-text {{
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
+        gap: 0.2rem;
     }}
     .app-title {{
         font-family: 'Ubuntu', sans-serif !important;
         font-weight: 700 !important;
         font-size: clamp(2.8rem, 5vw, 4.1rem);
-        letter-spacing: -0.03em;
-        color: var(--furyu-ink);
+        letter-spacing: -0.02em;
         margin: 0;
         line-height: 0.95;
+        /* preenchimento + contorno + extrusão 3D */
+        color: #1B7A9E;
+        -webkit-text-fill-color: #E8F4F8;
+        -webkit-text-stroke: 2.2px #0B4F6C;
+        paint-order: stroke fill;
+        text-shadow:
+            1px 1px 0 #083D54,
+            2px 2px 0 #083D54,
+            3px 3px 0 #062F42,
+            4px 4px 0 #041C28,
+            5px 6px 10px rgba(11, 79, 108, 0.28);
         animation: furyu-title-in 0.7s ease-out both;
+        filter: drop-shadow(0 2px 0 rgba(255, 255, 255, 0.35));
     }}
     @keyframes furyu-title-in {{
-        from {{ opacity: 0; transform: translateX(-8px); }}
-        to {{ opacity: 1; transform: translateX(0); }}
+        from {{ opacity: 0; transform: translateX(-8px) translateY(4px); }}
+        to {{ opacity: 1; transform: translateX(0) translateY(0); }}
     }}
     .app-tagline {{
         font-family: 'Ubuntu', sans-serif !important;
