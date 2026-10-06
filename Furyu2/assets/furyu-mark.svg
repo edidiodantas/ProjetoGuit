@@ -1,8 +1,7 @@
 <svg class="furyu-mark" width="200" height="120" viewBox="0 0 200 120" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Furyu — livro aberto isométrico flat">
   <!--
-    Ícone: livro aberto em perspectiva isométrica, deitado flat.
-    Contorno minimalista + linhas fluidas nas páginas + cores suaves.
-    Eixos iso: X ↓→ , Y ↓←  (plano da mesa).
+    Livro aberto, perspectiva isométrica, deitado flat.
+    Contorno minimalista + linhas fluidas = folhas (não texto).
   -->
   <defs>
     <linearGradient id="pgL" x1="24" y1="78" x2="96" y2="40" gradientUnits="userSpaceOnUse">
@@ -17,66 +16,55 @@
     </linearGradient>
   </defs>
 
-  <!-- sombra flat no “chão” -->
   <ellipse cx="100" cy="108" rx="58" ry="6" fill="#0B4F6C" opacity="0.11"/>
 
-  <!--
-    Capas isométricas (paralelogramos) — livro deitado, aberto.
-    Pontos esq: A(30,62) B(92,36) C(100,78) D(38,96)
-    Pontos dir: E(108,36) F(170,62) G(162,96) H(100,78)
-  -->
-  <path fill="#F08A45" d="M30 62 L92 36 L100 78 L38 96 Z"/>
-  <path fill="url(#pgL)" opacity="0.88" d="M30 62 L92 36 L100 78 L38 96 Z"/>
-  <path fill="#3B8FE8" d="M108 36 L170 62 L162 96 L100 78 Z"/>
-  <path fill="url(#pgR)" opacity="0.88" d="M108 36 L170 62 L162 96 L100 78 Z"/>
+  <!-- capas / páginas isométricas -->
+  <path fill="#F08A45" d="M26 64 L90 34 L100 78 L36 98 Z"/>
+  <path fill="url(#pgL)" opacity="0.9" d="M26 64 L90 34 L100 78 L36 98 Z"/>
+  <path fill="#3B8FE8" d="M110 34 L174 64 L164 98 L100 78 Z"/>
+  <path fill="url(#pgR)" opacity="0.9" d="M110 34 L174 64 L164 98 L100 78 Z"/>
 
-  <!-- bloco de páginas (creme) — inset isométrico -->
-  <path fill="#FFFCFA" opacity="0.8" d="M42 66 L88 44 L94 74 L48 90 Z"/>
-  <path fill="#FFFCFA" opacity="0.8" d="M112 44 L158 66 L152 90 L106 74 Z"/>
+  <!-- miolo creme (leitura) -->
+  <path fill="#FFFCFA" opacity="0.84" d="M40 68 L86 44 L94 74 L48 92 Z"/>
+  <path fill="#FFFCFA" opacity="0.84" d="M114 44 L160 68 L152 92 L106 74 Z"/>
 
-  <!-- Contorno minimalista (silhueta isométrica única) -->
-  <path fill="none" stroke="#0B4F6C" stroke-width="2.7"
+  <!-- contorno minimalista -->
+  <path fill="none" stroke="#0B4F6C" stroke-width="2.75"
         stroke-linecap="round" stroke-linejoin="round"
-        d="M30 62
-           L92 36
-           L100 44
-           L108 36
-           L170 62
-           L162 96
+        d="M26 64
+           L90 34
+           L100 42
+           L110 34
+           L174 64
+           L164 98
            L100 86
-           L38 96
+           L36 98
            Z"/>
 
-  <!-- lombada (vale) -->
-  <path fill="none" stroke="#0B4F6C" stroke-width="2.4" stroke-linecap="round"
-        d="M100 44 L100 86"/>
+  <!-- lombada -->
+  <path fill="none" stroke="#0B4F6C" stroke-width="2.45" stroke-linecap="round"
+        d="M100 42 L100 86"/>
 
-  <!-- espessura da capa (aresta inferior isométrica, leve) -->
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.35" stroke-width="1.5"
+  <!-- espessura inferior (flat no chão) -->
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.32" stroke-width="1.45"
         stroke-linecap="round"
-        d="M38 96 L42 100 L100 90 L158 100 L162 96"/>
+        d="M36 98 L40 102 L100 90 L160 102 L164 98"/>
 
   <!--
-    Linhas fluidas das páginas — curvas isométricas
-    (saem da lombada e acompanham o plano da folha).
+    Folhas fluidas: arcos longos no plano isométrico,
+    da lombada até a borda — leem como páginas, não linhas de texto.
   -->
-  <!-- esquerda -->
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.42" stroke-width="1.3" stroke-linecap="round"
-        d="M96 50 C78 48, 58 56, 40 70"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.34" stroke-width="1.2" stroke-linecap="round"
-        d="M96 58 C76 57, 56 64, 40 78"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.1" stroke-linecap="round"
-        d="M96 66 C76 66, 56 72, 42 86"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.18" stroke-width="1" stroke-linecap="round"
-        d="M96 74 C78 74, 58 78, 48 90"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.40" stroke-width="1.35" stroke-linecap="round"
+        d="M97 50 C74 46, 50 56, 32 72"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.30" stroke-width="1.2" stroke-linecap="round"
+        d="M97 62 C72 60, 48 68, 34 84"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.22" stroke-width="1.1" stroke-linecap="round"
+        d="M97 74 C74 74, 52 80, 40 94"/>
 
-  <!-- direita -->
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.42" stroke-width="1.3" stroke-linecap="round"
-        d="M104 50 C122 48, 142 56, 160 70"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.34" stroke-width="1.2" stroke-linecap="round"
-        d="M104 58 C124 57, 144 64, 160 78"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.26" stroke-width="1.1" stroke-linecap="round"
-        d="M104 66 C124 66, 144 72, 158 86"/>
-  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.18" stroke-width="1" stroke-linecap="round"
-        d="M104 74 C122 74, 142 78, 152 90"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.40" stroke-width="1.35" stroke-linecap="round"
+        d="M103 50 C126 46, 150 56, 168 72"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.30" stroke-width="1.2" stroke-linecap="round"
+        d="M103 62 C128 60, 152 68, 166 84"/>
+  <path fill="none" stroke="#0B4F6C" stroke-opacity="0.22" stroke-width="1.1" stroke-linecap="round"
+        d="M103 74 C126 74, 148 80, 160 94"/>
 </svg>
