@@ -1,0 +1,6 @@
+# ragas opcional (pode falhar por langchain_community.vertexai neste ambiente)
+# Preferimos DeepEval + métricas locais estilo Ragas em lib/metrics_heuristics.py
+deepeval>=2.0
+sentence-transformers>=2.2
+pytest>=8.0
+numpy>=1.24

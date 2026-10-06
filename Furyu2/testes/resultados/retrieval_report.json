@@ -1,0 +1,40 @@
+[
+  {
+    "id": "ret_ea",
+    "question": "Quais sao as principais conclusoes sobre educacao ambiental nas escolas?",
+    "n_contexts": 4,
+    "context_relevance": 0.5309020429849625,
+    "context_recall": 1.0,
+    "doc_recall": 1.0,
+    "detail": {
+      "relevance": "n=4 min=0.378 max=0.839",
+      "recall": "hits=['ALPHA-EA-2024', 'consciencia coletiva', 'engajamento']",
+      "doc": "target=educacao_ambiental.pdf",
+      "context_names": [
+        "educacao_ambiental pages 1-1",
+        "conflito_clima pages 1-1",
+        "aprendizagem_matematica pages 1-1",
+        "conflito_clima_oposto pages 1-1"
+      ]
+    }
+  },
+  {
+    "id": "ret_mat",
+    "question": "Como graficos dinamicos ajudam no ensino da funcao seno?",
+    "n_contexts": 4,
+    "context_relevance": 0.38917361199855804,
+    "context_recall": 1.0,
+    "doc_recall": 1.0,
+    "detail": {
+      "relevance": "n=4 min=0.203 max=0.758",
+      "recall": "hits=['BETA-MAT-2024', 'amplitude', 'seno']",
+      "doc": "target=aprendizagem_matematica.pdf",
+      "context_names": [
+        "aprendizagem_matematica pages 1-1",
+        "educacao_ambiental pages 1-1",
+        "conflito_clima pages 1-1",
+        "conflito_clima_oposto pages 1-1"
+      ]
+    }
+  }
+]

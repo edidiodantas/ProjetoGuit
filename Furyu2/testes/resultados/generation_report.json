@@ -1,0 +1,28 @@
+[
+  {
+    "id": "ret_ea",
+    "question": "Quais sao as principais conclusoes sobre educacao ambiental nas escolas?",
+    "answer_preview": "As principais conclusões sobre educação ambiental nas escolas, conforme o contexto fornecido, são:\n\n1.  A educação ambiental melhora a consciência coletiva nas escolas.\n2.  Projetos locais aumentam o engajamento dos alunos.\n\nO indicador ALPHA-EA-2024 mede a participação em mutirões verdes.",
+    "faithfulness": 0.6,
+    "answer_relevance": 0.9231351613998413,
+    "no_forbidden": 1.0,
+    "detail": {
+      "faithfulness": "supported=15/25",
+      "forbidden": "hits=[]",
+      "n_contexts": 4
+    }
+  },
+  {
+    "id": "gen_faithful",
+    "question": "O que e o indicador ALPHA-EA-2024?",
+    "answer_preview": "De acordo com o contexto fornecido, o indicador **ALPHA-EA-2024** mede a participação dos alunos em mutirões verdes. Não há menção de viagem espacial neste documento.",
+    "faithfulness": 0.6,
+    "answer_relevance": 0.5287447571754456,
+    "no_forbidden": 1.0,
+    "detail": {
+      "faithfulness": "supported=9/15",
+      "forbidden": "hits=[]",
+      "n_contexts": 4
+    }
+  }
+]
